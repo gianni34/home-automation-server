@@ -1,22 +1,17 @@
-from HomeAutomation.models import Artifact, Intermediary, User , Role, Zone, State, ArtifactType
+from HomeAutomation.models import *
 from rest_framework import serializers
 
 
 class ArtifactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artifact
-        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin', 'state')
+        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin')
+        depth = 1
 
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        fields = ('id', 'name')
-
-
-class StateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = State
         fields = ('id', 'name')
 
 
@@ -42,3 +37,24 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'password', 'question', 'answer', 'role')
+
+
+class ValueVariableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ValueVariable
+        fields = ('id', 'name', 'value', 'artifact', 'values')
+        depth = 1
+
+
+class BooleanVariableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BooleanVariable
+        fields = ('id', 'name', 'value', 'artifact', 'on')
+        depth = 1
+
+
+class ValueVariableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RangeVariable
+        fields = ('id', 'name', 'value', 'artifact', 'min', 'max', 'scale')
+        depth = 1

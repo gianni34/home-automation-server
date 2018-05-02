@@ -4,8 +4,8 @@ from rest_framework import viewsets, generics
 from rest_framework.utils import json
 
 from rest_framework.decorators import api_view, detail_route
-from HomeAutomation.serializers import UserSerializer, RoleSerializer, ArtifactSerializer, ZoneSerializer, IntermediarySerializer, ArtifactTypeSerializer, StateSerializer
-from HomeAutomation.models import Artifact, ArtifactType, State, Zone, Intermediary, Role, User
+from HomeAutomation.serializers import *
+from HomeAutomation.models import *
 
 
 class ListArtifacts(generics.ListAPIView):
@@ -28,6 +28,7 @@ class ArtifactTypes(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ArtifactTypeSerializer
 
 
+""""
 class ListStates(generics.ListAPIView):
     queryset = State.objects.all().order_by('name')
     serializer_class = StateSerializer
@@ -36,6 +37,8 @@ class ListStates(generics.ListAPIView):
 class States(generics.ListAPIView):
     queryset = State.objects.all()
     serializer_class = StateSerializer
+
+"""
 
 
 class ListZones(generics.ListAPIView):
@@ -76,6 +79,20 @@ class ListRoles(generics.ListAPIView):
 class Roles(generics.ListAPIView):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
+
+
+""""
+class ArtifactVariables(generics.ListAPIView):
+    artifact = request.GET['artifact']
+
+    response_data = {'result': False, 'message': "No se encontro el artefacto."}
+
+    obj = Artifact.objects.filter(id=artifact).first()
+    if obj:
+        queryset = ValueVariable.objects.filter(artifact=artifact).order_by('name')
+        serializer_class = ValueVariableSerializer
+        response_data =
+"""
 
 
 @api_view(['PUT'])

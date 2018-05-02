@@ -15,8 +15,6 @@ urlpatterns = [
     url(r'^artifact/(?P<pk>[0-9]+)/$', views.Artifacts.as_view()),
     url(r'^artifactType/(?P<pk>[0-9]+)/$', views.ArtifactTypes.as_view()),
     url(r'^artifactTypes/$', views.ListArtifactTypes),
-    url(r'^states/$', views.ListStates),
-    url(r'^state/(?P<pk>[0-9]+)/$', views.States.as_view()),
     url(r'^roles/$', views.ListRoles),
     url(r'^role/(?P<pk>[0-9]+)/$', views.Roles.as_view()),
     url(r'^changeState$', views.change_state, name='change_state'),

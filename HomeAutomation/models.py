@@ -1,18 +1,6 @@
 from django.db import models
+from enum import Enum
 from HomeAutomation.SSHConnection import Connection
-
-
-# Create your models here.
-class State(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=True, null=False)
-
-    def __str__(self):
-        return self.name
-
-
-# def __eq__(self, other):
-#    return self.name == other.name
 
 
 class ArtifactType(models.Model):
@@ -52,9 +40,8 @@ class Artifact(models.Model):
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
     pin = models.IntegerField(null=True)
-    state = models.ForeignKey(State, on_delete=models.DO_NOTHING, null=True)
 
-    def change_state(self, state):
+    """def change_state(self, state):
         if state == 'Prendido':
             value = 1
         elif state == "Apagado":
@@ -65,9 +52,43 @@ class Artifact(models.Model):
         command = "cambiarEstado(" + str(self.pin) + "," + str(value) + ")"
         Connection.execute_script("funciones.py", command)
         self.save()
+    """
 
     def __str__(self):
         return self.name + "(" + self.zone.name + ")"
+
+
+class StateVariable(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True, null=False)
+    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=True)
+    value = models.IntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class RangeVariable(StateVariable):
+    min = models.IntegerField(default=0)
+    max = models.IntegerField(default=1)
+    scale = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.name
+
+
+class BooleanVariable(StateVariable):
+    on = models.BooleanField()
+
+    def __str__(self):
+        return self.name
+
+
+class ValueVariable(StateVariable):
+    values = {}
+
+    def __str__(self):
+        return self.name
 
 
 class Role(models.Model):
