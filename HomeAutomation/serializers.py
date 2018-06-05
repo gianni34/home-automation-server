@@ -53,7 +53,7 @@ class BooleanVariableSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class ValueVariableSerializer(serializers.ModelSerializer):
+class RangeVariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = RangeVariable
         fields = ('id', 'name', 'value', 'artifact', 'min', 'max', 'scale')

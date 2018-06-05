@@ -1,5 +1,5 @@
 from django.db import models
-from enum import Enum
+from polymorphic.models import PolymorphicModel
 from HomeAutomation.SSHConnection import Connection
 
 
@@ -39,9 +39,14 @@ class Artifact(models.Model):
     type = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
+    onoff = models.BooleanField(default=False)
     pin = models.IntegerField(null=True)
 
-    """def change_state(self, state):
+    def __str__(self):
+        return self.name + "(" + self.zone.name + ")"
+
+
+"""def change_state(self, state):
         if state == 'Prendido':
             value = 1
         elif state == "Apagado":
@@ -54,11 +59,8 @@ class Artifact(models.Model):
         self.save()
     """
 
-    def __str__(self):
-        return self.name + "(" + self.zone.name + ")"
 
-
-class StateVariable(models.Model):
+class StateVariable(PolymorphicModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=True)
@@ -66,6 +68,38 @@ class StateVariable(models.Model):
 
     class Meta:
         abstract = True
+
+    def change_variable(self, id, artifact, variable, value):
+        if type == "onoff":
+            a = Artifact.objects.filter(artifact=artifact).first()
+            a.onoff = True
+            a.save(update_fields=['onoff'])
+        else:
+            if variable == "Range":
+                v = RangeVariable.objects.filter(id=variable).first()
+                if v.min >= value <= v.max:
+                    #Comparar con la escala
+                    self.value = value
+                    a = Artifact.objects.filter(artifact=artifact).first()
+                    pin = a.pin
+                    command = "cambiarEstado(" + str(pin) + "," + str(value) + ")"
+                    Connection.execute_script("funciones.py", command)
+                    self.save()
+                else:
+                    #error
+                    return
+            elif variable == "Boolean":
+                v = BooleanVariable.objects.filter(id=variable).first()
+                v.bool = value
+                a = Artifact.objects.filter(artifact=artifact).first()
+                pin = a.pin
+                if value:
+                    command = "cambiarEstado(" + str(pin) + "," + str(1) + ")"
+                    Connection.execute_script("funciones.py", command)
+                else:
+                    command = "cambiarEstado(" + str(pin) + "," + str(0) + ")"
+                    Connection.execute_script("funciones.py", command)
+                self.save()
 
 
 class RangeVariable(StateVariable):
@@ -78,7 +112,7 @@ class RangeVariable(StateVariable):
 
 
 class BooleanVariable(StateVariable):
-    on = models.BooleanField()
+    bool = models.BooleanField()
 
     def __str__(self):
         return self.name
