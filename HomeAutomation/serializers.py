@@ -5,7 +5,7 @@ from rest_framework import serializers
 class ArtifactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artifact
-        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin')
+        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin', 'power')
         depth = 1
 
 
@@ -39,22 +39,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'password', 'question', 'answer', 'role')
 
 
-class ValueVariableSerializer(serializers.ModelSerializer):
+class StateVariableSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ValueVariable
-        fields = ('id', 'name', 'value', 'artifact', 'values')
-        depth = 1
-
-
-class BooleanVariableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BooleanVariable
-        fields = ('id', 'name', 'value', 'artifact', 'on')
-        depth = 1
-
-
-class RangeVariableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RangeVariable
-        fields = ('id', 'name', 'value', 'artifact', 'min', 'max', 'scale')
+        model = StateVariable
+        fields = ('id', 'name', 'artifact', 'type', 'value', 'min', 'max', 'scale')
         depth = 1

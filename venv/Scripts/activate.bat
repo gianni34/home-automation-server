@@ -1,5 +1,5 @@
 @echo off
-set "VIRTUAL_ENV=C:\Users\#34\Desktop\TESIS\Prototype\venv"
+set "VIRTUAL_ENV=C:\Users\PC-74\Desktop\Yoggui\Tesis\Server\venv"
 
 if not defined PROMPT (
     set "PROMPT=$P$G"

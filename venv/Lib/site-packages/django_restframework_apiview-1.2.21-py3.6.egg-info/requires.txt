@@ -1,0 +1,9 @@
+django
+djangorestframework
+django-import-export
+
+[dev]
+check-manifest
+
+[test]
+coverage

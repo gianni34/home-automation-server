@@ -1,6 +1,23 @@
 from django.db import models
-from polymorphic.models import PolymorphicModel
 from HomeAutomation.SSHConnection import Connection
+from HomeAutomation.validators import VariableValidations
+
+
+class Parameters(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True, null=False)
+    value = models.CharField(max_length=100, unique=True, null=False)
+
+    def __str__(self):
+        return self.name
+
+    def get_change_v_method(self):
+        reg = self.objects.filter(name="changeVariable").first()
+        return reg.value
+
+    def get_script_name(self):
+        reg = self.objects.filter(name="script").first()
+        return reg.value
 
 
 class ArtifactType(models.Model):
@@ -39,90 +56,62 @@ class Artifact(models.Model):
     type = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
-    onoff = models.BooleanField(default=False)
+    power = models.BooleanField(default=False)
     pin = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name + "(" + self.zone.name + ")"
 
+    def turn_on(self):
+        self.power = True
+        params = Parameters()
+        method_name = params.get_change_v_method()
+        command = method_name + "(" + str(self.pin) + "," + str(1) + ")"
+        script = params.get_script_name()
+        Connection.execute_script(script, command)
+        self.save(update_fields=['power'])
 
-"""def change_state(self, state):
-        if state == 'Prendido':
-            value = 1
-        elif state == "Apagado":
-            value = 0
-
-        e = State.objects.filter(name=state).first()
-        self.state = e
-        command = "cambiarEstado(" + str(self.pin) + "," + str(value) + ")"
-        Connection.execute_script("funciones.py", command)
-        self.save()
-    """
+    def turn_off(self):
+        self.power = False
+        params = Parameters()
+        method_name = params.get_change_v_method()
+        command = method_name + "(" + str(self.pin) + "," + str(0) + ")"
+        script = params.get_script_name()
+        Connection.execute_script(script, command)
+        self.save(update_fields=['power'])
 
 
-class StateVariable(PolymorphicModel):
+class StateVariable(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=True, null=False)
-    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=True)
-    value = models.IntegerField()
-
-    class Meta:
-        abstract = True
-
-    def change_variable(self, id, artifact, variable, value):
-        if type == "onoff":
-            a = Artifact.objects.filter(artifact=artifact).first()
-            a.onoff = True
-            a.save(update_fields=['onoff'])
-        else:
-            if variable == "Range":
-                v = RangeVariable.objects.filter(id=variable).first()
-                if v.min >= value <= v.max:
-                    #Comparar con la escala
-                    self.value = value
-                    a = Artifact.objects.filter(artifact=artifact).first()
-                    pin = a.pin
-                    command = "cambiarEstado(" + str(pin) + "," + str(value) + ")"
-                    Connection.execute_script("funciones.py", command)
-                    self.save()
-                else:
-                    #error
-                    return
-            elif variable == "Boolean":
-                v = BooleanVariable.objects.filter(id=variable).first()
-                v.bool = value
-                a = Artifact.objects.filter(artifact=artifact).first()
-                pin = a.pin
-                if value:
-                    command = "cambiarEstado(" + str(pin) + "," + str(1) + ")"
-                    Connection.execute_script("funciones.py", command)
-                else:
-                    command = "cambiarEstado(" + str(pin) + "," + str(0) + ")"
-                    Connection.execute_script("funciones.py", command)
-                self.save()
-
-
-class RangeVariable(StateVariable):
+    name = models.CharField(max_length=100, unique=False, null=False)
+    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
+    type = models.CharField(max_length=50, null=True)
+    typeUI = models.CharField(max_length=50, null=True)
+    value = models.CharField(max_length=50, null=True)
     min = models.IntegerField(default=0)
     max = models.IntegerField(default=1)
     scale = models.IntegerField(default=1)
 
-    def __str__(self):
-        return self.name
-
-
-class BooleanVariable(StateVariable):
-    bool = models.BooleanField()
-
-    def __str__(self):
-        return self.name
-
-
-class ValueVariable(StateVariable):
-    values = {}
-
-    def __str__(self):
-        return self.name
+    def change_variable(self, power, artifact, value):
+        a = Artifact.objects.filter(artifact=artifact).first()
+        variable = self.id
+        if not power:
+            Artifact.turn_off(a)
+        else:
+            validate = VariableValidations.value_validation(variable, value)
+            if validate[0]:
+                self.value = value
+                pin = a.pin
+                params = Parameters()
+                method_name = params.get_change_v_method()
+                # ver si tengo que cambiar el valor por otro valor para que onion lo entienda
+                command = method_name + "(" + str(pin) + "," + value + ")"
+                script = params.get_script_name()
+                Connection.execute_script(script, command)
+                a.save()
+                self.save()
+            else:
+                return validate[1]
 
 
 class Role(models.Model):
@@ -135,7 +124,7 @@ class Role(models.Model):
 
 class User(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=False, null=False)
+    name = models.CharField(max_length=100, unique=True, null=False)
     role = models.ForeignKey(Role, on_delete=models.DO_NOTHING, null=False)
     question = models.CharField(max_length=100, unique=False, null=False)
     answer = models.CharField(max_length=100, unique=False, null=False)
@@ -171,3 +160,23 @@ class User(models.Model):
 
     def __str__(self):
         return self.name + '(' + self.role.name + ')'
+
+
+class Scene(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True, null=False)
+    description = models.CharField(max_length=200, unique=False, null=False)
+    end_time = models.DateTimeField(null=True)
+    initial_time = models.DateTimeField(null=True)
+    frequency = models.CharField(max_length=20, unique=False, null=False)
+    on_demand = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
+class SceneActions(models.Model):
+    id = models.AutoField(primary_key=True)
+    variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING)
+    value = models.CharField(max_length=50, null=False)
+    scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING)
