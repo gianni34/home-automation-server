@@ -28,19 +28,6 @@ class ArtifactTypes(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ArtifactTypeSerializer
 
 
-""""
-class ListStates(generics.ListAPIView):
-    queryset = State.objects.all().order_by('name')
-    serializer_class = StateSerializer
-
-
-class States(generics.ListAPIView):
-    queryset = State.objects.all()
-    serializer_class = StateSerializer
-
-"""
-
-
 class ListZones(generics.ListAPIView):
     queryset = Zone.objects.all().order_by('name')
     serializer_class = ZoneSerializer
@@ -81,18 +68,24 @@ class Roles(generics.ListAPIView):
     serializer_class = RoleSerializer
 
 
-""""
-class ArtifactVariables(generics.ListAPIView):
-    artifact = request.GET['artifact']
+class ListParameters(generics.ListAPIView):
+    queryset = Parameters.objects.all().order_by('name')
+    serializer_class = ParametersSerializer
 
-    response_data = {'result': False, 'message': "No se encontro el artefacto."}
 
-    obj = Artifact.objects.filter(id=artifact).first()
-    if obj:
-        queryset = ValueVariable.objects.filter(artifact=artifact).order_by('name')
-        serializer_class = ValueVariableSerializer
-        response_data =
-"""
+class Parameters(generics.ListAPIView):
+    queryset = Parameters.objects.all()
+    serializer_class = ParametersSerializer
+
+
+class ListScenes(generics.ListAPIView):
+    queryset = Scene.objects.all().order_by('name')
+    serializer_class = SceneSerializer
+
+
+class Scene(generics.ListAPIView):
+    queryset = Scene.objects.all()
+    serializer_class = SceneSerializer
 
 
 @api_view(['PUT'])

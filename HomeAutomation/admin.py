@@ -1,5 +1,4 @@
 from django.contrib import admin
-#from polymorphic.admin import PolymorphicInlineSupportMixin, StackedPolymorphicInline
 from HomeAutomation.models import *
 
 admin.site.register(Parameters)

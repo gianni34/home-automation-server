@@ -44,3 +44,22 @@ class StateVariableSerializer(serializers.ModelSerializer):
         model = StateVariable
         fields = ('id', 'name', 'artifact', 'type', 'value', 'min', 'max', 'scale')
         depth = 1
+
+
+class SceneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scene
+        fields = ('id', 'name', 'description', 'end_time', 'initial_time', 'frequency', 'on_demand')
+
+
+class SceneActionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SceneActions
+        fields = ('id', 'variable', 'value', 'scene')
+        depth = 1
+
+
+class ParametersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Parameters
+        fields = ('id', 'name', 'value')
