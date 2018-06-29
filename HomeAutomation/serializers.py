@@ -47,6 +47,8 @@ class StateVariableSerializer(serializers.ModelSerializer):
 
 
 class SceneSerializer(serializers.ModelSerializer):
+    actions = serializers.PrimaryKeyRelatedField(many=True, queryset=SceneActions.objects.all())
+
     class Meta:
         model = Scene
         fields = ('id', 'name', 'description', 'end_time', 'initial_time', 'frequency', 'on_demand')
@@ -56,7 +58,6 @@ class SceneActionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SceneActions
         fields = ('id', 'variable', 'value', 'scene')
-        depth = 1
 
 
 class ParametersSerializer(serializers.ModelSerializer):

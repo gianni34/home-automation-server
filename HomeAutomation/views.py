@@ -1,11 +1,14 @@
 import _json
 from django.http import JsonResponse, HttpResponse
-from rest_framework import viewsets, generics
+from rest_framework import status, generics
 from rest_framework.utils import json
+from django.views.decorators.csrf import csrf_exempt
 
+from rest_framework.response import Response
 from rest_framework.decorators import api_view, detail_route
 from HomeAutomation.serializers import *
 from HomeAutomation.models import *
+from HomeAutomation.business import *
 
 
 class ListArtifacts(generics.ListAPIView):
@@ -63,7 +66,7 @@ class ListRoles(generics.ListAPIView):
     serializer_class = RoleSerializer
 
 
-class Roles(generics.ListAPIView):
+class Roles(generics.RetrieveUpdateDestroyAPIView):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
@@ -73,19 +76,22 @@ class ListParameters(generics.ListAPIView):
     serializer_class = ParametersSerializer
 
 
-class Parameters(generics.ListAPIView):
+class Parameters(generics.RetrieveUpdateDestroyAPIView):
     queryset = Parameters.objects.all()
     serializer_class = ParametersSerializer
 
 
+""""
 class ListScenes(generics.ListAPIView):
     queryset = Scene.objects.all().order_by('name')
     serializer_class = SceneSerializer
 
 
-class Scene(generics.ListAPIView):
+class Scene(generics.RetrieveUpdateDestroyAPIView):
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
+
+"""
 
 
 @api_view(['PUT'])
@@ -162,6 +168,15 @@ def new_user(request):
 
     usu = User.objects.filter(name=user).first()
 
+    """"
+    data = JSONParser().parse(request)
+    serializer = UserSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data, status=201)
+    return JsonResponse(serializer.errors, status=400)
+    """
+
     if User.is_admin(usu):
         User.save(new, role, question, answer, password)
     else:
@@ -175,3 +190,46 @@ def user_question(request):
     if obj and obj.question:
         response_data = {'result': True, 'question': obj.question}
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+# @csrf_exempt
+@api_view(['GET'], ['POST'])
+def scene_list(request):
+
+    if request.method == 'GET':
+        scenes = Scene.objects.all()
+        serializer = SceneSerializer(scenes, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = SceneSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+# @csrf_exempt
+@api_view(['GET', 'PUT', 'DELETE'])
+def scene_detail(request, pk):
+    
+    try:
+        scene = Scene.objects.get(pk=pk)
+    except Scene.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = SceneSerializer(scene)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = SceneSerializer(scene, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        scene.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
