@@ -93,7 +93,7 @@ class StateVariable(models.Model):
     scale = models.IntegerField(default=1)
 
     def change_variable(self, power, artifact, value):
-        a = Artifact.objects.filter(artifact=artifact).first()
+        a = Artifact.objects.filter(id=artifact).first()
         variable = self.id
         if not power:
             Artifact.turn_off(a)
@@ -179,4 +179,4 @@ class SceneActions(models.Model):
     id = models.AutoField(primary_key=True)
     variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING)
     value = models.CharField(max_length=50, null=False)
-    scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING)
+    scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, related_name='actions')

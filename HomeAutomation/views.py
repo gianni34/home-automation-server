@@ -1,6 +1,6 @@
 import _json
 from django.http import JsonResponse, HttpResponse
-from rest_framework import status, generics
+from rest_framework import status, generics, viewsets
 from rest_framework.utils import json
 from django.views.decorators.csrf import csrf_exempt
 
@@ -81,18 +81,24 @@ class Parameters(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ParametersSerializer
 
 
-""""
-class ListScenes(generics.ListAPIView):
+class ListScenesView(generics.ListAPIView):
     queryset = Scene.objects.all().order_by('name')
     serializer_class = SceneSerializer
 
 
-class Scene(generics.RetrieveUpdateDestroyAPIView):
+class SceneView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
 
-"""
 
+class SceneViewSet(viewsets.ModelViewSet):
+    queryset = Scene.objects.all()
+    serializer_class = SceneSerializer
+
+
+class StateVariableViewSet(viewsets.ModelViewSet):
+    queryset = StateVariable.objects.all()
+    serializer_class = StateVariableSerializer
 
 @api_view(['PUT'])
 def change_state(request):
@@ -190,46 +196,3 @@ def user_question(request):
     if obj and obj.question:
         response_data = {'result': True, 'question': obj.question}
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-
-
-# @csrf_exempt
-@api_view(['GET'], ['POST'])
-def scene_list(request):
-
-    if request.method == 'GET':
-        scenes = Scene.objects.all()
-        serializer = SceneSerializer(scenes, many=True)
-        return Response(serializer.data)
-
-    elif request.method == 'POST':
-        serializer = SceneSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-# @csrf_exempt
-@api_view(['GET', 'PUT', 'DELETE'])
-def scene_detail(request, pk):
-    
-    try:
-        scene = Scene.objects.get(pk=pk)
-    except Scene.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = SceneSerializer(scene)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = SceneSerializer(scene, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        scene.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
