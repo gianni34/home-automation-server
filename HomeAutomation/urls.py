@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^scenes/$', views.scene_list),
     url(r'^scene/(?P<pk>[0-9]+)/$', views.scene_detail),
     url(r'^changeState$', views.change_state, name='change_state'),
+    url(r'^setTemperature$', views.set_temperature, name='set_temperature'),
     url(r'^changePassword$', views.change_password, name='change_password'),
     url(r'^login$', views.login, name='login'),
 ]

@@ -115,6 +115,28 @@ def change_state(request):
 
 
 @api_view(['PUT'])
+def set_temperature(request):
+
+    print("------- algo consume el servicio -----------")
+    print(request.data)
+    intermediary = request.data['intermediary']
+    print(intermediary)
+    value = request.data['value']
+    print(value)
+
+    try:
+        i = Intermediary.objects.filter(name=intermediary).first()
+        z = Zone.objects.filter(intermediary=i.id).first()
+        z.set_temperature(value)
+    except ValueError:
+        #return Response(status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'ERROR': 'No se encontró la zona correspondiente.'})
+
+    #return Response(status=status.HTTP_200_OK)
+    return JsonResponse({'EXITO': 'Estado modificado con Exito'})
+
+
+@api_view(['PUT'])
 def change_password(request):
 
     user = request.GET['user']
