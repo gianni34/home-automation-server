@@ -31,14 +31,6 @@ class ArtifactType(models.Model):
     #   return self.name == other.name
 
 
-class Zone(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=True, null=False)
-
-    def __str__(self):
-        return self.name
-
-
 class Intermediary(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40, unique=True, null=False)
@@ -48,6 +40,20 @@ class Intermediary(models.Model):
 
     def __str__(self):
         return self.name + ' -  IP: ' + self.ip
+
+
+class Zone(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True, null=False)
+    intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
+    temperature = models.FloatField(null=True)
+
+    def __str__(self):
+        return self.name
+
+    def set_temperature(self, value):
+        self.temperature = value
+        self.save(update_fields=['temperature'])
 
 
 class Artifact(models.Model):
