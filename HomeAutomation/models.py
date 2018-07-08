@@ -164,6 +164,9 @@ class User(models.Model):
         else:
             return False
 
+    def get_question(self):
+        return self.question
+
     def __str__(self):
         return self.name + '(' + self.role.name + ')'
 

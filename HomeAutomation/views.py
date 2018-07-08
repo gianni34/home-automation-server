@@ -1,6 +1,6 @@
 import _json
 from django.http import JsonResponse, HttpResponse
-from rest_framework import status, generics, viewsets
+from rest_framework import status, viewsets
 from rest_framework.utils import json
 
 from rest_framework.decorators import api_view, detail_route
@@ -54,29 +54,6 @@ class StateVariableViewSet(viewsets.ModelViewSet):
     serializer_class = StateVariableSerializer
 
 
-""""
-@api_view(['PUT'])
-def change_state(request):
-
-    zone = request.GET['zone']
-    name = request.GET['name']
-
-    try:
-        z = Zone.objects.filter(name=zone).first()
-        artifact = Artifact.objects.filter(zone=z.id, name=name).first()
-    except ValueError:
-        #return Response(status=status.HTTP_404_NOT_FOUND)
-        return JsonResponse({'ERROR': 'No se encontro el artefacto.'})
-
-    state = request.GET['state']
-    artifact.change_state(state)
-
-    #return Response(status=status.HTTP_200_OK)
-    return JsonResponse({'EXITO': 'Estado modificado con Exito'})
-
-"""
-
-
 @api_view(['PUT'])
 def set_temperature(request):
 
@@ -99,6 +76,7 @@ def set_temperature(request):
     return JsonResponse({'EXITO': 'Estado modificado con Exito'})
 
 
+""""
 @api_view(['PUT'])
 def change_password(request):
 
@@ -113,6 +91,7 @@ def change_password(request):
         return JsonResponse({'EXITO': 'OK'})
     else:
         return JsonResponse({'ERROR': ret})
+"""
 
 
 def check_answer(request):
@@ -121,57 +100,25 @@ def check_answer(request):
     answer = request.data['answer']
 
     u = User.objects.filter(name=user).first()
-    ret = u.check_answer(answer)
-
-    if ret:
-        return JsonResponse({'EXITO': 'OK'})
+    if u.check_answer(answer):
+        return HttpResponse('Respuesta correcta.', status=status.HTTP_400_BAD_REQUEST)
     else:
-        return JsonResponse({'ERROR': 'La respuesta no coincide.'})
+        return HttpResponse("Respuesta incorrecta incorrectos.", status=status.HTTP_400_BAD_REQUEST)
 
 
 def login(request):
     user = request.data['user']
     password = request.data['pass']
 
-    response_data = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
-
     obj = User.objects.filter(name=user).first()
-    if obj and obj.password == password:
-        response_data = {'result': True, 'message': 'Inició correctamente.'}
-    return JsonResponse(response_data)
-    #return HttpResponse(json.dumps(response_data), content_type="application/json")
-
-
-@api_view(['POST'])
-def new_user(request):
-    user = request.data['usuario']
-    new = request.data['usuarioN']
-    password = request.data['pass']
-    role = request.data['rol']
-    question = request.data['pregunta']
-    answer = request.data['respuesta']
-
-    usu = User.objects.filter(name=user).first()
-
-    """"
-    data = JSONParser().parse(request)
-    serializer = UserSerializer(data=data)
-    if serializer.is_valid():
-        serializer.save()
-        return JsonResponse(serializer.data, status=201)
-    return JsonResponse(serializer.errors, status=400)
-    """
-
-    if User.is_admin(usu):
-        User.save(new, role, question, answer, password)
+    if obj.login(password):
+        return HttpResponse('Inició correctamente.', status=status.HTTP_400_BAD_REQUEST)
     else:
-        return JsonResponse({'ERROR': 'Debe ser administrador para dar de alta un usuario.'})
+        return HttpResponse("Usuario y/o contraseña incorrectos.", status=status.HTTP_400_BAD_REQUEST)
 
 
 def user_question(request):
-    user = request.GET['user']
-    response_data = {'result': False, 'question': ''}
+    user = request.data['user']
     obj = User.objects.filter(name=user).first();
-    if obj and obj.question:
-        response_data = {'result': True, 'question': obj.question}
-    return HttpResponse(json.dumps(response_data), content_type="application/json")
+    question = obj.get_question()
+    return HttpResponse(question, content_type="application/json")

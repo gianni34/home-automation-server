@@ -36,7 +36,6 @@ class IntermediarySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     user = serializers.IntegerField(allow_null=True, required=False)
     old_password = serializers.CharField(allow_blank=True, required=False)
-    # role = RoleSerializer
 
     class Meta:
         model = User
@@ -99,9 +98,41 @@ class StateVariableSerializer(serializers.ModelSerializer):
 
 
 class SceneActionsSerializer(serializers.ModelSerializer):
+    id_aux = serializers.IntegerField(required=False, allow_null=True)
+    to_delete = serializers.NullBooleanField()
+
     class Meta:
         model = SceneActions
-        fields = ('id', 'variable', 'value')
+        fields = ('id', 'id_aux', 'variable', 'value', 'to_delete')
+
+    def create(self, validated_data):
+        super(SceneActionsSerializer, self).create(validated_data)
+
+    def update(self, instance, validated_data):
+        # id_aux = instance['variable'].id
+        # mod_action = User.objects.filter(id=id_aux).first()
+        if not validated_data['to_delete']:
+            # a_id = validated_data['variable'].id
+            a = SceneActions.objects.filter(id=validated_data['id_aux']).first()
+            if not a:
+                a_id = 0
+                return False
+                # No estoy pudiendo llamar el create correctamente
+                # ret = super(SceneActionsSerializer, self).create(validated_data)
+            else:
+                del validated_data['to_delete']
+                # Tambien me da error
+                ret = super(SceneActionsSerializer, self).update(instance, validated_data)
+                return ret
+        else:
+            instance.delete()
+            return "Deleted"
+
+    def __delete__(self, data):
+        id_aux = data['variable'].id
+        to_del = SceneActions.objects.filter(id=id_aux).first()
+        to_del.delete()
+        return True
 
 
 class SceneSerializer(serializers.ModelSerializer):
@@ -116,15 +147,22 @@ class SceneSerializer(serializers.ModelSerializer):
         actions = validated_data['actions']
         del validated_data['actions']
         ret = super(SceneSerializer, self).create(validated_data)
-        actionSerializer = SceneActionsSerializer()
+        action_serializer = SceneActionsSerializer()
         for action in actions:
             action['scene'] = ret
-            actionSerializer.create(action)
+            action_serializer.create(action)
         return ret
 
     def update(self, instance, validated_data):
-        sceneAux = Scene.objects.filter(id=validated_data['id'])
-        ret = super(SceneSerializer, self).update(self, sceneAux, validated_data)
+        actions = validated_data['actions']
+        del validated_data['actions']
+        action_serializer = SceneActionsSerializer()
+        for action in actions:
+            # del action['to_delete']
+            mod_action = SceneActions.objects.filter(id=action['id_aux']).first()
+            action_serializer.update(mod_action, action)
+        scene_aux = Scene.objects.filter(id=instance.id)
+        ret = super(SceneSerializer, self).update(scene_aux, validated_data)
         return ret
 
 
