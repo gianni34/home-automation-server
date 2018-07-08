@@ -45,6 +45,8 @@ class Intermediary(models.Model):
 class Zone(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
+    type = models.CharField(max_length=40, unique=False, null=True)
+    pin = models.IntegerField(null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
     temperature = models.FloatField(null=True)
 
@@ -132,17 +134,15 @@ class User(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
     role = models.ForeignKey(Role, on_delete=models.DO_NOTHING, null=False)
-    question = models.CharField(max_length=100, unique=False, null=False)
-    answer = models.CharField(max_length=100, unique=False, null=False)
+    question = models.CharField(max_length=100, unique=False, null=True)
+    answer = models.CharField(max_length=100, unique=False, null=True)
     password = models.CharField(max_length=100, unique=False, null=False)
 
-    def change_password(self, old_password, new_password):
+    def verify_old_password(self, old_password):
         if not old_password == self.password:
-            raise ValueError('La contraseña vieja no coincide')
+            return False
         else:
-            self.password = new_password
-            self.save()
-            return 'OK'
+            return True
 
     def login(self, password):
 

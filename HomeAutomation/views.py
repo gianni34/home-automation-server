@@ -2,93 +2,46 @@ import _json
 from django.http import JsonResponse, HttpResponse
 from rest_framework import status, generics, viewsets
 from rest_framework.utils import json
-from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework.response import Response
 from rest_framework.decorators import api_view, detail_route
 from HomeAutomation.serializers import *
 from HomeAutomation.models import *
 from HomeAutomation.business import *
 
 
-class ListArtifacts(generics.ListAPIView):
+class ArtifactsViewSet(viewsets.ModelViewSet):
     queryset = Artifact.objects.all()
     serializer_class = ArtifactSerializer
 
 
-class Artifacts(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Artifact.objects.all()
-    serializer_class = ArtifactSerializer
-
-
-class ListArtifactTypes(generics.ListAPIView):
-    queryset = ArtifactType.objects.all().order_by('name')
-    serializer_class = ArtifactSerializer
-
-
-class ArtifactTypes(generics.RetrieveUpdateDestroyAPIView):
+class ArtifactTypesViewSet(viewsets.ModelViewSet):
     queryset = ArtifactType.objects.all()
     serializer_class = ArtifactTypeSerializer
 
 
-class ListZones(generics.ListAPIView):
-    queryset = Zone.objects.all().order_by('name')
-    serializer_class = ZoneSerializer
-
-
-class Zones(generics.RetrieveUpdateDestroyAPIView):
+class ZonesViewSet(viewsets.ModelViewSet):
     queryset = Zone.objects.all()
     serializer_class = ZoneSerializer
 
 
-class ListIntermediaries(generics.ListAPIView):
-    queryset = Intermediary.objects.all().order_by('name')
-    serializer_class = IntermediarySerializer
-
-
-class Intermediaries(generics.RetrieveUpdateDestroyAPIView):
+class IntermediariesViewSet(viewsets.ModelViewSet):
     queryset = Intermediary.objects.all()
     serializer_class = IntermediarySerializer
 
 
-class ListUsers(generics.ListCreateAPIView):
-    queryset = User.objects.all().order_by('name')
-    serializer_class = UserSerializer
-
-
-class Users(generics.RetrieveUpdateDestroyAPIView):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class ListRoles(generics.ListAPIView):
-    queryset = Role.objects.all().order_by('name')
-    serializer_class = RoleSerializer
-
-
-class Roles(generics.RetrieveUpdateDestroyAPIView):
+class RolesViewSet(viewsets.ModelViewSet):
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
 
-class ListParameters(generics.ListAPIView):
-    queryset = Parameters.objects.all().order_by('name')
-    serializer_class = ParametersSerializer
-
-
-class Parameters(generics.RetrieveUpdateDestroyAPIView):
+class ParametersViewSet(viewsets.ModelViewSet):
     queryset = Parameters.objects.all()
     serializer_class = ParametersSerializer
-
-
-class ListScenesView(generics.ListAPIView):
-    queryset = Scene.objects.all().order_by('name')
-    serializer_class = SceneSerializer
-
-
-class SceneView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Scene.objects.all()
-    serializer_class = SceneSerializer
 
 
 class SceneViewSet(viewsets.ModelViewSet):
@@ -100,6 +53,8 @@ class StateVariableViewSet(viewsets.ModelViewSet):
     queryset = StateVariable.objects.all()
     serializer_class = StateVariableSerializer
 
+
+""""
 @api_view(['PUT'])
 def change_state(request):
 
@@ -118,6 +73,8 @@ def change_state(request):
 
     #return Response(status=status.HTTP_200_OK)
     return JsonResponse({'EXITO': 'Estado modificado con Exito'})
+
+"""
 
 
 @api_view(['PUT'])
@@ -145,9 +102,9 @@ def set_temperature(request):
 @api_view(['PUT'])
 def change_password(request):
 
-    user = request.GET['user']
-    old_password = request.GET['oPass']
-    new_password = request.GET['nPass']
+    user = request.data['user']
+    old_password = request.data['oPass']
+    new_password = request.data['nPass']
 
     usu = User.objects.filter(name=user).first()
     ret = usu.change_password(old_password, new_password)
@@ -160,8 +117,8 @@ def change_password(request):
 
 def check_answer(request):
 
-    user = request.GET['user']
-    answer = request.GET['answer']
+    user = request.data['user']
+    answer = request.data['answer']
 
     u = User.objects.filter(name=user).first()
     ret = u.check_answer(answer)
@@ -173,8 +130,8 @@ def check_answer(request):
 
 
 def login(request):
-    user = request.GET['user']
-    password = request.GET['pass']
+    user = request.data['user']
+    password = request.data['pass']
 
     response_data = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
 
@@ -187,12 +144,12 @@ def login(request):
 
 @api_view(['POST'])
 def new_user(request):
-    user = request.GET['usuario']
-    new = request.GET['usuarioN']
-    password = request.GET['pass']
-    role = request.GET['rol']
-    question = request.GET['pregunta']
-    answer = request.GET['respuesta']
+    user = request.data['usuario']
+    new = request.data['usuarioN']
+    password = request.data['pass']
+    role = request.data['rol']
+    question = request.data['pregunta']
+    answer = request.data['respuesta']
 
     usu = User.objects.filter(name=user).first()
 
