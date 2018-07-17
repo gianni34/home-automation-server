@@ -165,6 +165,9 @@ class User(models.Model):
     def get_question(self):
         return self.question
 
+    def get_question(self):
+        return self.question
+
     def __str__(self):
         return self.name
 
