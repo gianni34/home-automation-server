@@ -7,16 +7,17 @@ router.register(r'scenes', views.SceneViewSet)
 router.register(r'stateVariables', views.StateVariableViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'zones', views.ZonesViewSet)
-router.register(r'intermediaries', views.IntermediariesViewSet)
-router.register(r'artifacts', views.ArtifactsViewSet)
-router.register(r'artifactsTypes', views.ArtifactTypesViewSet)
-router.register(r'roles', views.RolesViewSet)
+# router.register(r'intermediaries', views.IntermediariesViewSet)
+# router.register(r'artifacts', views.ArtifactsViewSet)
+# router.register(r'artifactsTypes', views.ArtifactTypesViewSet)
+# router.register(r'roles', views.RolesViewSet)
 router.register(r'parameters', views.ParametersViewSet)
 
 urlpatterns = [
     url(r'^setTemperature$', views.set_temperature, name='set_temperature'),
-    url(r'^changePassword$', views.change_password, name='change_password'),
+    url(r'^checkAnswer', views.check_answer, name='check_answer'),
     url(r'^userQuestion$', views.user_question, name='user_question'),
+    url(r'^createUser$', views.new_user, name='new_user'),
     url(r'^login$', views.login, name='login'),
     url(r'^', include(router.urls))
 ]

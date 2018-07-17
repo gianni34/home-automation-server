@@ -8,6 +8,7 @@ admin.site.register(User)
 admin.site.register(Role)
 admin.site.register(ArtifactType)
 admin.site.register(StateVariable)
+admin.site.register(Scene)
 
 
 class StateVariableInLine(admin.StackedInline):

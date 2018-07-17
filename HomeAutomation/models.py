@@ -64,14 +64,14 @@ class Artifact(models.Model):
     type = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
-    power = models.BooleanField(default=False)
+    on = models.BooleanField(default=False)
     pin = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name + "(" + self.zone.name + ")"
 
     def turn_on(self):
-        self.power = True
+        self.on = True
         params = Parameters()
         method_name = params.get_change_v_method()
         command = method_name + "(" + str(self.pin) + "," + str(1) + ")"
@@ -80,7 +80,7 @@ class Artifact(models.Model):
         self.save(update_fields=['power'])
 
     def turn_off(self):
-        self.power = False
+        self.on = False
         params = Parameters()
         method_name = params.get_change_v_method()
         command = method_name + "(" + str(self.pin) + "," + str(0) + ")"
@@ -133,10 +133,11 @@ class Role(models.Model):
 class User(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
-    role = models.ForeignKey(Role, on_delete=models.DO_NOTHING, null=False)
+    # role = models.ForeignKey(Role, on_delete=models.DO_NOTHING, null=False)
     question = models.CharField(max_length=100, unique=False, null=True)
     answer = models.CharField(max_length=100, unique=False, null=True)
     password = models.CharField(max_length=100, unique=False, null=False)
+    isAdmin = models.BooleanField(null=False, default=False)
 
     def verify_old_password(self, old_password):
         if not old_password == self.password:
@@ -159,13 +160,13 @@ class User(models.Model):
             return False
 
     def is_admin(self):
-        if self.role.name == 'Administrador':
-            return True
-        else:
-            return False
+        return self.isAdmin
+
+    def get_question(self):
+        return self.question
 
     def __str__(self):
-        return self.name + '(' + self.role.name + ')'
+        return self.name
 
 
 class Scene(models.Model):
