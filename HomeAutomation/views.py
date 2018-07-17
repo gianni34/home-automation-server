@@ -108,15 +108,6 @@ def new_user(request):
         return JsonResponse({'result': False, 'message': 'El nombre de usuario ingresado ya existe.'})
     usu = User.objects.filter(id=admin).first()
 
-    """"
-    data = JSONParser().parse(request)
-    serializer = UserSerializer(data=data)
-    if serializer.is_valid():
-        serializer.save()
-        return JsonResponse(serializer.data, status=201)
-    return JsonResponse(serializer.errors, status=400)
-    """
-
     if User.is_admin(usu):
         new = User()
         new.name = user["name"]
