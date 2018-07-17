@@ -91,11 +91,11 @@ def check_answer(request):
 def login(request):
     user = request.data['user']
     password = request.data['pass']
-
+    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el usuario.'}
     obj = User.objects.filter(name=user).first()
-<<<<<<< HEAD
-    if obj and obj.password == password:
+    if obj and obj.login(password):
         response_data = {'result': True, 'message': 'Inició correctamente.', 'data': obj.id}
+        return JsonResponse(response_data)
     return JsonResponse(response_data)
     #return HttpResponse(json.dumps(response_data), content_type="application/json")
 
@@ -117,25 +117,13 @@ def new_user(request):
         return JsonResponse({'result': True})
     else:
         return JsonResponse({'result': False, 'message': 'Debe ser administrador para dar de alta un usuario.'})
-=======
-    if obj.login(password):
-        return HttpResponse('Inició correctamente.', status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return HttpResponse("Usuario y/o contraseña incorrectos.", status=status.HTTP_400_BAD_REQUEST)
->>>>>>> ecb13989d45dc8494718bb6b87880023406bad85
 
 
 @api_view(['PUT'])
 def user_question(request):
     user = request.data['user']
-<<<<<<< HEAD
     response_data = {'result': False, 'question': ''}
     obj = User.objects.filter(name=user).first()
     if obj and obj.question:
         response_data = {'result': True, 'question': obj.question}
     return HttpResponse(json.dumps(response_data), content_type="application/json")
-=======
-    obj = User.objects.filter(name=user).first();
-    question = obj.get_question()
-    return HttpResponse(question, content_type="application/json")
->>>>>>> ecb13989d45dc8494718bb6b87880023406bad85
