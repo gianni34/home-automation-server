@@ -13,6 +13,15 @@ class ZonesViewSet(viewsets.ModelViewSet):
     queryset = Zone.objects.all()
     serializer_class = ZoneSerializer
 
+    @detail_route()
+    def artifact_list(self, request, pk=None):
+        zone = self.get_object()  # retrieve an object by pk provided
+        artifacts = Artifact.objects.filter(zone=zone).distinct()
+        artifact_json = ArtifactSerializer(artifacts, many=True)
+        # artifacts_json = json.dumps(artifacts)
+        # return HttpResponse(artifacts, content_type="application/json", status=200)
+        return JsonResponse(artifact_json.data, safe=False)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -90,7 +99,7 @@ def check_answer(request):
 @api_view(['PUT'])
 def login(request):
     user = request.data['user']
-    password = request.data['pass']
+    password = request.data['password']
     response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el usuario.'}
     obj = User.objects.filter(name=user).first()
     if obj and obj.login(password):
