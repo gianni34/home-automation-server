@@ -92,7 +92,7 @@ class Artifact(models.Model):
 class StateVariable(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=False, null=False)
-    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
+    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, related_name='variables')
     type = models.CharField(max_length=50, null=True)
     typeUI = models.CharField(max_length=50, null=True)
     value = models.CharField(max_length=50, null=True)

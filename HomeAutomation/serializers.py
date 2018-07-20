@@ -2,13 +2,6 @@ from HomeAutomation.models import *
 from rest_framework import serializers, status
 
 
-class ArtifactSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Artifact
-        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin', 'on')
-        depth = 1
-
-
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
@@ -74,12 +67,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class StateVariableSerializer(serializers.ModelSerializer):
 
-    artifact = ArtifactSerializer()
+    # artifact = ArtifactSerializer()
 
     class Meta:
         model = StateVariable
         fields = ('id', 'name', 'artifact', 'type', 'typeUI', 'value', 'min', 'max', 'scale')
-        depth = 1
 
     def create(self, validated_data):
         artifact = validated_data['artifact']
@@ -95,6 +87,14 @@ class StateVariableSerializer(serializers.ModelSerializer):
         ret = super(StateVariableSerializer, self).update(variable, validated_data)
         ret.change_variable(ret.artifact.on, ret.artifact.id, ret.value)
         return ret
+
+
+class ArtifactSerializer(serializers.ModelSerializer):
+    variables = StateVariableSerializer(many=True)
+
+    class Meta:
+        model = Artifact
+        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin', 'on', 'variables')
 
 
 class SceneActionsSerializer(serializers.ModelSerializer):

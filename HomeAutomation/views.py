@@ -13,6 +13,15 @@ class ZonesViewSet(viewsets.ModelViewSet):
     queryset = Zone.objects.all()
     serializer_class = ZoneSerializer
 
+    @detail_route()
+    def artifact_list(self, request, pk=None):
+        zone = self.get_object()  # retrieve an object by pk provided
+        artifacts = Artifact.objects.filter(zone=zone).distinct()
+        artifact_json = ArtifactSerializer(artifacts, many=True)
+        # artifacts_json = json.dumps(artifacts)
+        # return HttpResponse(artifacts, content_type="application/json", status=200)
+        return JsonResponse(artifact_json.data, safe=False)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
