@@ -90,14 +90,13 @@ def check_answer(request):
 @api_view(['PUT'])
 def login(request):
     user = request.data['user']
-    password = request.data['pass']
-    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el usuario.'}
+    password = request.data['password']
+    response_data = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
     obj = User.objects.filter(name=user).first()
     if obj and obj.login(password):
         response_data = {'result': True, 'message': 'Inició correctamente.', 'data': obj.id}
         return JsonResponse(response_data)
     return JsonResponse(response_data)
-    #return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
 @api_view(['POST'])
