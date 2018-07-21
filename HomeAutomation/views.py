@@ -106,7 +106,21 @@ def login(request):
         response_data = {'result': True, 'message': 'Inició correctamente.', 'data': obj.id}
         return JsonResponse(response_data)
     return JsonResponse(response_data)
-    #return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+@api_view(['PUT'])
+def change_power(request):
+    artifact = request.data['artifact']
+    power = request.data['power']
+    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el artefacto.'}
+    obj = Artifact.objects.filter(id=artifact).first()
+    if obj:
+        obj.change_power(power)
+        if power:
+            response_data = {'result': True, 'message': 'El artefacto se prendio correctamente.', 'data': obj.id}
+        else:
+            response_data = {'result': True, 'message': 'El artefacto se apago correctamente.', 'data': obj.id}
+    return JsonResponse(response_data)
 
 
 @api_view(['POST'])

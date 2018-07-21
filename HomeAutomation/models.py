@@ -70,23 +70,20 @@ class Artifact(models.Model):
     def __str__(self):
         return self.name + "(" + self.zone.name + ")"
 
-    def turn_on(self):
-        self.on = True
+    def change_power(self, power):
+        self.on = power
         params = Parameters()
         method_name = params.get_change_v_method()
-        command = method_name + "(" + str(self.pin) + "," + str(1) + ")"
+        if power:
+            command = method_name + "(" + str(self.pin) + "," + str(1) + ")"
+        else:
+            command = method_name + "(" + str(self.pin) + "," + str(0) + ")"
         script = params.get_script_name()
         Connection.execute_script(script, command)
         self.save(update_fields=['power'])
 
-    def turn_off(self):
-        self.on = False
-        params = Parameters()
-        method_name = params.get_change_v_method()
-        command = method_name + "(" + str(self.pin) + "," + str(0) + ")"
-        script = params.get_script_name()
-        Connection.execute_script(script, command)
-        self.save(update_fields=['power'])
+    def is_on(self):
+        return self.on
 
 
 class StateVariable(models.Model):
@@ -104,7 +101,7 @@ class StateVariable(models.Model):
         a = Artifact.objects.filter(id=artifact).first()
         variable = self.id
         if not power:
-            Artifact.turn_off(a)
+            Artifact.change_power(a, power)
         else:
             validate = VariableValidations.value_validation(variable, value)
             if validate[0]:
@@ -116,6 +113,8 @@ class StateVariable(models.Model):
                 command = method_name + "(" + str(pin) + "," + value + ")"
                 script = params.get_script_name()
                 Connection.execute_script(script, command)
+                if not a.is_on:
+                    a.change_power(self, power)
                 a.save()
                 self.save()
             else:
