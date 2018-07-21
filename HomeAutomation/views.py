@@ -100,12 +100,13 @@ def check_answer(request):
 def login(request):
     user = request.data['user']
     password = request.data['password']
-    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el usuario.'}
+    response_data = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
     obj = User.objects.filter(name=user).first()
     if obj and obj.login(password):
         response_data = {'result': True, 'message': 'Inició correctamente.', 'data': obj.id}
         return JsonResponse(response_data)
     return JsonResponse(response_data)
+<<<<<<< HEAD
 
 
 @api_view(['PUT'])
@@ -121,6 +122,8 @@ def change_power(request):
         else:
             response_data = {'result': True, 'message': 'El artefacto se apago correctamente.', 'data': obj.id}
     return JsonResponse(response_data)
+=======
+>>>>>>> 0c796ac08e967e43c02ea35bff7eb045cd8970a1
 
 
 @api_view(['POST'])
