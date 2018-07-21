@@ -47,7 +47,7 @@ class Zone(models.Model):
     name = models.CharField(max_length=100, unique=True, null=False)
     type = models.CharField(max_length=40, unique=False, null=True)
     pin = models.IntegerField(null=True)
-    intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
+    intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, blank=True, null=True)
     temperature = models.FloatField(null=True)
 
     def __str__(self):
@@ -139,24 +139,13 @@ class User(models.Model):
     isAdmin = models.BooleanField(null=False, default=False)
 
     def verify_old_password(self, old_password):
-        if not old_password == self.password:
-            return False
-        else:
-            return True
+        return old_password == self.password
 
     def login(self, password):
-
-        if self.password == password:
-            return True
-        else:
-            return False
+        return self.password == password
 
     def check_answer(self, answer):
-
-        if self.answer == answer:
-            return True
-        else:
-            return False
+        return self.answer == answer
 
     def is_admin(self):
         return self.isAdmin
