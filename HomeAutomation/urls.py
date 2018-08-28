@@ -15,6 +15,7 @@ router.register(r'parameters', views.ParametersViewSet)
 
 urlpatterns = [
     url(r'^setTemperature$', views.set_temperature, name='set_temperature'),
+    url(r'^deleteUser$', views.delete_user, name='delete_user'),
     url(r'^checkAnswer', views.check_answer, name='check_answer'),
     url(r'^userQuestion$', views.user_question, name='user_question'),
     url(r'^createUser$', views.new_user, name='new_user'),

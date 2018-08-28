@@ -65,7 +65,7 @@ class Artifact(models.Model):
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
     on = models.BooleanField(default=False)
-    pin = models.IntegerField(null=True)
+    connector = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.name + "(" + self.zone.name + ")"
@@ -75,9 +75,9 @@ class Artifact(models.Model):
         params = Parameters()
         method_name = params.get_change_v_method()
         if power:
-            command = method_name + "(" + str(self.pin) + "," + str(1) + ")"
+            command = method_name + "(" + str(self.connector) + "," + str(1) + ")"
         else:
-            command = method_name + "(" + str(self.pin) + "," + str(0) + ")"
+            command = method_name + "(" + str(self.connector) + "," + str(0) + ")"
         script = params.get_script_name()
         Connection.execute_script(script, command)
         self.save(update_fields=['power'])

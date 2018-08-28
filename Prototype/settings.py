@@ -66,12 +66,14 @@ WSGI_APPLICATION = 'Prototype.wsgi.application'
 
 DATABASES = {
     'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'PrototypeDB',
-            'USER': 'postgres',
-            'PASSWORD': 'Kennedy34*',
-            'HOST': 'localhost',
-            'PORT': '',
+            #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            #'NAME': 'PrototypeDB',
+            #'USER': 'postgres',
+            #'PASSWORD': 'Kennedy34*',
+            #'HOST': 'localhost',
+            #'PORT': '',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'PrototypeDB'),
         }
 }
 
