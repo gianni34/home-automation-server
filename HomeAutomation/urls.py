@@ -20,7 +20,7 @@ urlpatterns = [
     url(r'^userQuestion$', views.user_question, name='user_question'),
     url(r'^createUser$', views.new_user, name='new_user'),
     url(r'^login$', views.login, name='login'),
-    url(r'^change_power$', views.change_power, name='change_power'),
+    url(r'^changePower$', views.change_power, name='change_power'),
     url(r'^', include(router.urls))
 ]
 

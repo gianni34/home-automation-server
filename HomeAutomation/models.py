@@ -31,6 +31,25 @@ class ArtifactType(models.Model):
     #   return self.name == other.name
 
 
+class SSHConfig(models.Model):
+    id = models.AutoField(primary_key=True)
+    artifactType = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False, unique=True)
+    script = models.CharField(max_length=100, null=False)
+    method = models.CharField(max_length=100, null=False)
+
+    def __str__(self):
+        return self.script + ' - ' + self.method
+
+
+class WSConfig(models.Model):
+    id = models.AutoField(primary_key=True)
+    artifactType = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False, unique=True)
+    name = models.CharField(max_length=100, null=False)
+
+    def __str__(self):
+        return self.name
+
+
 class Intermediary(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40, unique=True, null=False)
@@ -72,15 +91,20 @@ class Artifact(models.Model):
 
     def change_power(self, power):
         self.on = power
-        params = Parameters()
-        method_name = params.get_change_v_method()
-        if power:
-            command = method_name + "(" + str(self.connector) + "," + str(1) + ")"
-        else:
-            command = method_name + "(" + str(self.connector) + "," + str(0) + ")"
-        script = params.get_script_name()
-        Connection.execute_script(script, command)
-        self.save(update_fields=['power'])
+        # params = Parameters()
+        # method_name = params.get_change_v_method()
+        ssh = SSHConfig.objects.filter(artifactType=self.type).first()
+        intermediary = Intermediary.objects.filter(id=self.intermediary).first()
+        if ssh:
+            on = '1' if power else '0'
+            command = ssh.method + "(" + str(self.connector) + "," + on + ")"
+            Connection.execute_script(intermediary.name, intermediary.user, intermediary.password, ssh.script, command)
+            self.save(update_fields=['on'])
+            return
+        ws = WSConfig.objects.filter(artifactType=self.type).first()
+        if ws:
+            # consumir ws.. etc
+            return
 
     def is_on(self):
         return self.on

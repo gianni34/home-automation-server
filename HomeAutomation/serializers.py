@@ -94,7 +94,7 @@ class ArtifactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Artifact
-        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'pin', 'on', 'variables')
+        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'connector', 'on', 'variables')
 
 
 class SceneActionsSerializer(serializers.ModelSerializer):

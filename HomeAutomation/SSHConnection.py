@@ -10,7 +10,7 @@ class Connection:
         ssh.connect(host, 22, user, password)
         return ssh
 
-    def execute_script(name, command):
-        ssh_obj = Connection.get_connection('omega-EC2B', "root", "onioneer")
-        stdin, stdout, stderr = ssh_obj.exec_command("python /root/" + name + " '" + command + "'")
+    def execute_script(intermediary, user, password, script, command):
+        ssh_obj = Connection.getconnection(intermediary, user, password)
+        stdin, stdout, stderr = ssh_obj.exec_command("python /root/" + script + " '" + command + "'")
         print("Ejecuto el proceso " + name + " correctamente.")

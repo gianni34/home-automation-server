@@ -133,12 +133,12 @@ def login(request):
 
 @api_view(['PUT'])
 def change_power(request):
-    try:
-        artifact = request.data['artifact']
-        power = request.data['power']
-    except e:
-        # falta loggear el error
-        return JsonResponse(error_inputs)
+    # try:
+    artifact = request.data['artifact']
+    power = request.data['power']
+    # except e:
+    # falta loggear el error
+    #    return JsonResponse(error_inputs)
     response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el artefacto.'}
     obj = Artifact.objects.filter(id=artifact).first()
     if obj:
