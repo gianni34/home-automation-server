@@ -1,6 +1,7 @@
 from django.contrib import admin
 from HomeAutomation.models import *
 
+admin.site.register(VariableRange)
 admin.site.register(SSHConfig)
 admin.site.register(WSConfig)
 admin.site.register(Parameters)
@@ -13,8 +14,14 @@ admin.site.register(StateVariable)
 admin.site.register(Scene)
 
 
+class VariableRangeInLine(admin.StackedInline):
+    model = VariableRange
+    extra = 0
+
+
 class StateVariableInLine(admin.StackedInline):
     model = StateVariable
+    inlines = [VariableRangeInLine]
     extra = 0
 
 
@@ -24,6 +31,3 @@ class ArtifactAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Artifact, ArtifactAdmin)
-
-
-

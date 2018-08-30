@@ -65,13 +65,21 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'result': False, 'message': 'Debe ser administrador para modificar un usuario.'})
 
 
+class VariableRangeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = VariableRange
+        fields = ('id', 'type', 'name', 'variable')
+
+
 class StateVariableSerializer(serializers.ModelSerializer):
 
+    ranges = VariableRangeSerializer(many=True)
     # artifact = ArtifactSerializer()
 
     class Meta:
         model = StateVariable
-        fields = ('id', 'name', 'artifact', 'type', 'typeUI', 'value', 'min', 'max', 'scale')
+        fields = ('id', 'name', 'artifact', 'type', 'typeUI', 'value', 'min', 'max', 'scale', 'ranges')
 
     def create(self, validated_data):
         artifact = validated_data['artifact']

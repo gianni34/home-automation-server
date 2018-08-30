@@ -121,6 +121,9 @@ class StateVariable(models.Model):
     max = models.IntegerField(default=1)
     scale = models.IntegerField(default=1)
 
+    def __str__(self):
+        return self.name
+
     def change_variable(self, power, artifact, value):
         a = Artifact.objects.filter(id=artifact).first()
         variable = self.id
@@ -143,6 +146,16 @@ class StateVariable(models.Model):
                 self.save()
             else:
                 return validate[1]
+
+
+class VariableRange(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=False, null=False)
+    type = models.CharField(max_length=50, null=True)
+    variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING, null=False)
+
+    def __str__(self):
+        return self.name
 
 
 class Role(models.Model):
@@ -202,3 +215,4 @@ class SceneActions(models.Model):
     variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING)
     value = models.CharField(max_length=50, null=False)
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, related_name='actions')
+
