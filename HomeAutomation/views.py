@@ -62,7 +62,7 @@ def set_temperature(request):
         z.set_temperature(value)
     except ValueError:
         return JsonResponse({'result': False, 'message': 'No se encontró la zona correspondiente.'})
-    return Response(status=status.HTTP_200_OK)
+    return JsonResponse({'result': True, 'message': 'Dato recibido correctamente.'})
 
 
 """"
@@ -149,6 +149,18 @@ def change_power(request):
             response_data = {'result': True, 'message': 'El artefacto se prendio correctamente.', 'data': obj.id}
         else:
             response_data = {'result': True, 'message': 'El artefacto se apago correctamente.', 'data': obj.id}
+    return JsonResponse(response_data)
+
+
+
+@api_view(['PUT'])
+def execute_scene(request):
+    scene = request.data['scene']
+    response_data = {'result': False, 'message': 'Se produjo un error al ejecutar la escena.'}
+    obj = Scene.objects.filter(id=scene).first()
+    if obj:
+        obj.execute_scene()
+        response_data = {'result': True, 'message': 'La escena se ejecuto correctamente.'}
     return JsonResponse(response_data)
 
 

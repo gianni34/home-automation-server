@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^login$', views.login, name='login'),
     url(r'^changePower$', views.change_power, name='change_power'),
     url(r'^changeVariable', views.change_variable, name='change_variable'),
+    url(r'^executeScene', views.execute_scene, name='execute_scene'),
     url(r'^', include(router.urls))
 ]
 
