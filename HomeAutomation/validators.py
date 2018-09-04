@@ -13,10 +13,10 @@ class VariableValidations:
     def value_validation(self, variable, value):
         var = StateVariable.objects.filter(id=variable).first()
         if var.min > value > var.max:
-            return False, "El valor pasado no pertenece al rango de la variable"
+            return {'result': False, 'message': "El valor pasado no pertenece al rango de la variable."}
         else:
             values = self.d_range(var.min, var.max, var.scale)
             for i in values:
                 if i == value:
-                    return True, ""
-            return False, "El valor pasado, no contiene una precision correcta."
+                    return {'result': True, 'message': ""}
+            return {'result': False, 'message': "El valor pasado, no contiene una precision correcta."}

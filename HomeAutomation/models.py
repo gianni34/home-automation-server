@@ -1,6 +1,7 @@
 from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
+import requests
 
 
 class Parameters(models.Model):
@@ -33,7 +34,7 @@ class ArtifactType(models.Model):
 
 class SSHConfig(models.Model):
     id = models.AutoField(primary_key=True)
-    artifactType = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False, unique=True)
+    artifactType = models.OneToOneField(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False)
     script = models.CharField(max_length=100, null=False)
     method = models.CharField(max_length=100, null=False)
 
@@ -43,7 +44,7 @@ class SSHConfig(models.Model):
 
 class WSConfig(models.Model):
     id = models.AutoField(primary_key=True)
-    artifactType = models.ForeignKey(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False, unique=True)
+    artifactType = models.OneToOneField(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False)
     name = models.CharField(max_length=100, null=False)
 
     def __str__(self):
@@ -93,16 +94,35 @@ class Artifact(models.Model):
         self.on = power
         # params = Parameters()
         # method_name = params.get_change_v_method()
-        ssh = SSHConfig.objects.filter(artifactType=self.type).first()
-        intermediary = Intermediary.objects.filter(id=self.intermediary).first()
+        ssh = SSHConfig.objects.filter(artifactType=self.type.id).first()
         if ssh:
             on = '1' if power else '0'
             command = ssh.method + "(" + str(self.connector) + "," + on + ")"
-            Connection.execute_script(intermediary.name, intermediary.user, intermediary.password, ssh.script, command)
+            Connection.execute_script(intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
             self.save(update_fields=['on'])
             return
-        ws = WSConfig.objects.filter(artifactType=self.type).first()
+        ws = WSConfig.objects.filter(artifactType=self.type.id).first()
         if ws:
+            url = 'http://' + self.intermediary.name + '/' + ws.name
+            print(url)
+            if self.type.name == 'AC' and power:
+                variables = StateVariable.objects.filter(artifact=self.id)
+                code = ''
+                for v in variables:
+                    print(v)
+                    code += '#' + v.value if len(code) > 0 else v.value
+                print(code)
+                req = requests.put(url, json={'value': code})
+                print(req.text)
+                return
+            else:
+                on = '1'
+                if not power:
+                    on = '0'
+                # cuando no es un AC, o es un off que se manda un cero:
+                req = requests.put(url, json={'value': on})
+                print(req.text)
+                return
             # consumir ws.. etc
             return
 
@@ -124,35 +144,50 @@ class StateVariable(models.Model):
     def __str__(self):
         return self.name
 
-    def change_variable(self, power, artifact, value):
-        a = Artifact.objects.filter(id=artifact).first()
-        variable = self.id
-        if not power:
-            Artifact.change_power(a, power)
-        else:
-            validate = VariableValidations.value_validation(variable, value)
-            if validate[0]:
-                self.value = value
-                pin = a.pin
-                params = Parameters()
-                method_name = params.get_change_v_method()
-                # ver si tengo que cambiar el valor por otro valor para que onion lo entienda
-                command = method_name + "(" + str(pin) + "," + value + ")"
-                script = params.get_script_name()
-                Connection.execute_script(script, command)
-                if not a.is_on:
-                    a.change_power(self, power)
-                a.save()
-                self.save()
+    def change_variable(self, value):
+        # a = Artifact.objects.filter(id=self.artifact).first()
+        validate = VariableValidations.value_validation(self.id, value)
+        if not validate.result:
+            return validate
+
+        self.value = value
+        ssh = SSHConfig.objects.filter(artifactType=self.artifact.type.id).first()
+        if ssh:
+            command = ssh.method + "(" + str(self.artifact.connector) + "," + value + ")"
+            Connection.execute_script(intermediary.name, self.artifact.intermediary.user, self.artifact.intermediary.password, ssh.script,
+                                      command)
+            self.save(update_fields=['value'])
+            return {'result': True, 'message': 'Se modificó correctamente.'}
+
+        ws = WSConfig.objects.filter(artifactType=self.artifact.type.id).first()
+        if ws:
+            url = 'http://' + self.intermediary.name + '/' + ws.name
+            print(url)
+            if self.artifact.type.name == 'AC':
+                variables = StateVariable.objects.filter(artifact=self.artifact.id)
+                code = ''
+                for v in variables:
+                    print(v)
+                    if v.id == self.id:
+                        code += '#' + value if len(code) > 0 else value
+                    else:
+                        code += '#' + v.value if len(code) > 0 else v.value
+                print(code)
+                req = requests.put(url, json={'value': code})
+                print(req.text)
             else:
-                return validate[1]
+                req = requests.put(url, json={'value': value})
+                print(req.text)
+            return {'result': True, 'message': 'Se modificó correctamente.'}
+        return {'result': False, 'message': 'El artefacto esta mal configurado.'}
 
 
 class VariableRange(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=False, null=False)
     type = models.CharField(max_length=50, null=True)
-    variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING, null=False)
+    value = models.CharField(max_length=50, default=0, null=False)
+    variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING, null=False, related_name='ranges')
 
     def __str__(self):
         return self.name

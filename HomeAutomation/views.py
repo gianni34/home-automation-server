@@ -152,6 +152,24 @@ def change_power(request):
     return JsonResponse(response_data)
 
 
+@api_view(['PUT'])
+def change_variable(request):
+    # try:
+    variable = request.data['variable']
+    value = request.data['value']
+    # except e:
+    # falta loggear el error
+    #    return JsonResponse(error_inputs)
+    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró la variable.'}
+    obj = StateVariable.objects.filter(id=variable).first()
+    if obj:
+        # mandarle al onion correspondiente que prenda/apague
+        obj.change_variable(value)
+
+        response_data = {'result': True, 'message': 'La variable se modificó correctamente.', 'data': obj.id}
+    return JsonResponse(response_data)
+
+
 @api_view(['POST'])
 def new_user(request):
     try:

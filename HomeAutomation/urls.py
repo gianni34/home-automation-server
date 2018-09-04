@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^createUser$', views.new_user, name='new_user'),
     url(r'^login$', views.login, name='login'),
     url(r'^changePower$', views.change_power, name='change_power'),
+    url(r'^changeVariable', views.change_variable, name='change_variable'),
     url(r'^', include(router.urls))
 ]
 

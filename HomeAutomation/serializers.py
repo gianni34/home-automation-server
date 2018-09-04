@@ -69,7 +69,7 @@ class VariableRangeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VariableRange
-        fields = ('id', 'type', 'name', 'variable')
+        fields = ('id', 'type', 'name', 'value', 'variable')
 
 
 class StateVariableSerializer(serializers.ModelSerializer):
