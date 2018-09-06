@@ -7,11 +7,19 @@ from rest_framework.decorators import api_view, detail_route
 from HomeAutomation.serializers import *
 from HomeAutomation.models import *
 from HomeAutomation.business import *
+from HomeAutomation.exceptions import *
 
 error_not_admin_message = {'result': False, 'message': 'No tiene permisos de administrador.'}
 error_temperature = {'result': False, 'message': 'Falta algún dato en el mensaje enviado por el sensor.'}
 error_inputs = {'result': False, 'message': 'Falta algún dato requerido para la operación.'}
-
+error_connection = {'result': False, 'message': 'No se pudo comunicar con el dispositivo. Verifique que se encuentra conectado.'}
+error_configuration = {'result': False, 'message': 'El artefacto esta mal configurado.'}
+error_validation = {'result': False, 'message': 'El valor seleccionado no es válido.'}
+error_zone_not_found = {'result': False, 'message': 'Se produjo un error, no se encontró la zona.'}
+error_artifact_not_found = {'result': False, 'message': 'Se produjo un error, no se encontró el artefacto.'}
+error_variable_not_found = {'result': False, 'message': 'Se produjo un error, no se encontró la variable.'}
+error_login = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
+error_user_exists = {'result': False, 'message': 'El nombre de usuario ingresado ya existe.'}
 
 class ZonesViewSet(viewsets.ModelViewSet):
     queryset = Zone.objects.all()
@@ -52,9 +60,9 @@ def set_temperature(request):
     try:
         intermediary = request.data['intermediary']
         value = request.data['value']
-    except e:
+    except:
         # falta loggear el error
-        return JsonResponse({'result': False, 'message': 'Falta algún dato en el mensaje enviado por el sensor.'})
+        return JsonResponse(error_inputs)
 
     try:
         i = Intermediary.objects.filter(name=intermediary).first()
@@ -89,9 +97,9 @@ def delete_user(request):
         user = request.data['user']
         id = request.data['id']
         admin = User.objects.get(id=user)
-    except e:
+    except:
         # falta loggear el error
-        return JsonResponse({'result': False, 'message': 'Falta algún dato en el mensaje enviado.'})
+        return JsonResponse(error_inputs)
     if not admin or not admin.isAdmin:
         return JsonResponse(error_not_admin_message)
     if User.objects.get(id=id):
@@ -105,9 +113,9 @@ def check_answer(request):
     try:
         user = request.data['user']
         answer = request.data['answer']
-    except e:
+    except:
         # falta loggear el error
-        return JsonResponse({'result': False, 'message': 'Falta algún dato en el mensaje enviado por el sensor.'})
+        return JsonResponse(error_inputs)
     u = User.objects.filter(name=user).first()
     if u.check_answer(answer):
         return HttpResponse('Respuesta correcta.', status=status.HTTP_400_BAD_REQUEST)
@@ -120,54 +128,57 @@ def login(request):
     try:
         user = request.data['user']
         password = request.data['password']
-    except e:
+    except:
         # falta loggear el error
-        return JsonResponse({'result': False, 'message': 'Falta algún dato en el mensaje enviado por el sensor.'})
-    response_data = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
+        return JsonResponse(error_inputs)
     obj = User.objects.filter(name=user).first()
     if obj and obj.login(password):
-        response_data = {'result': True, 'message': 'Inició correctamente.', 'data': obj.id}
-        return JsonResponse(response_data)
-    return JsonResponse(response_data)
+        return JsonResponse({'result': True, 'message': 'Inició correctamente.', 'data': obj.id})
+    return JsonResponse(error_login)
 
 
 @api_view(['PUT'])
 def change_power(request):
-    # try:
-    artifact = request.data['artifact']
-    power = request.data['power']
-    # except e:
-    # falta loggear el error
-    #    return JsonResponse(error_inputs)
-    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró el artefacto.'}
+    try:
+        artifact = request.data['artifact']
+        power = request.data['power']
+    except:
+        # falta loggear el error
+        return JsonResponse(error_inputs)
     obj = Artifact.objects.filter(id=artifact).first()
     if obj:
         # mandarle al onion correspondiente que prenda/apague
-        obj.change_power(power)
-
-        if power:
-            response_data = {'result': True, 'message': 'El artefacto se prendio correctamente.', 'data': obj.id}
-        else:
-            response_data = {'result': True, 'message': 'El artefacto se apago correctamente.', 'data': obj.id}
-    return JsonResponse(response_data)
+        try:
+            obj.change_power(power)
+        except ConnectionExc:
+            return JsonResponse(error_connection)
+        except ConfigurationExc:
+            return JsonResponse(error_configuration)
+        return JsonResponse({'result': True, 'message': 'El artefacto se ' + 'prendió' if power else 'apagó' + 'correctamente.'})
+    return JsonResponse(error_artifact_not_found)
 
 
 @api_view(['PUT'])
 def change_variable(request):
-    # try:
-    variable = request.data['variable']
-    value = request.data['value']
-    # except e:
-    # falta loggear el error
-    #    return JsonResponse(error_inputs)
-    response_data = {'result': False, 'message': 'Se produjo un error, no se encontró la variable.'}
+    try:
+        variable = request.data['variable']
+        value = request.data['value']
+    except:
+        # falta loggear el error
+        return JsonResponse(error_inputs)
     obj = StateVariable.objects.filter(id=variable).first()
     if obj:
         # mandarle al onion correspondiente que prenda/apague
-        obj.change_variable(value)
-
-        response_data = {'result': True, 'message': 'La variable se modificó correctamente.', 'data': obj.id}
-    return JsonResponse(response_data)
+        try:
+            response = obj.change_variable(value)
+        except ConnectionExc:
+            return JsonResponse(error_connection)
+        except ConfigurationExc:
+            return JsonResponse(error_configuration)
+        except ValidationExc:
+            return JsonResponse(error_validation)
+        return JsonResponse({'result': True, 'message': 'La variable se modificó correctamente.'})
+    return JsonResponse(error_variable_not_found)
 
 
 @api_view(['POST'])
@@ -175,11 +186,11 @@ def new_user(request):
     try:
         user = request.data['user']
         admin = request.data['admin']
-    except e:
+    except:
         # falta loggear el error
         return JsonResponse(error_inputs)
     if len(User.objects.filter(name=user["name"])) > 0:
-        return JsonResponse({'result': False, 'message': 'El nombre de usuario ingresado ya existe.'})
+        return JsonResponse(error_user_exists)
     usu = User.objects.filter(id=admin).first()
 
     if User.is_admin(usu):
@@ -197,7 +208,7 @@ def new_user(request):
 def user_question(request):
     try:
         user = request.data['user']
-    except e:
+    except:
         # falta loggear el error
         return JsonResponse(error_inputs)
     response_data = {'result': False, 'question': ''}

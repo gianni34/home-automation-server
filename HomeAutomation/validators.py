@@ -4,6 +4,9 @@ import decimal
 
 class VariableValidations:
 
+    def __init__(self):
+        return
+
     @staticmethod
     def d_range(x, y, jump):
         while x < y:
@@ -11,11 +14,10 @@ class VariableValidations:
             x += decimal.Decimal(jump)
 
     def value_validation(self, variable, value):
-        var = StateVariable.objects.filter(id=variable).first()
-        if var.min > value > var.max:
+        if value < variable.min or value > variable.max:
             return {'result': False, 'message': "El valor pasado no pertenece al rango de la variable."}
         else:
-            values = self.d_range(var.min, var.max, var.scale)
+            values = self.d_range(variable.min, variable.max, variable.scale)
             for i in values:
                 if i == value:
                     return {'result': True, 'message': ""}

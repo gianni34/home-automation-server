@@ -1,6 +1,7 @@
 from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
+from HomeAutomation.exceptions import *
 import requests
 
 
@@ -98,9 +99,12 @@ class Artifact(models.Model):
         if ssh:
             on = '1' if power else '0'
             command = ssh.method + "(" + str(self.connector) + "," + on + ")"
-            Connection.execute_script(intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
+            try:
+                Connection.execute_script(intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
+            except:
+                raise ConnectionExc()
             self.save(update_fields=['on'])
-            return
+            return True
         ws = WSConfig.objects.filter(artifactType=self.type.id).first()
         if ws:
             url = 'http://' + self.intermediary.name + '/' + ws.name
@@ -112,19 +116,18 @@ class Artifact(models.Model):
                     print(v)
                     code += '#' + v.value if len(code) > 0 else v.value
                 print(code)
+            else:
+                code = '1' if power else '0'
+                # cuando no es un AC, o es un off que se manda un cero:
+            try:
                 req = requests.put(url, json={'value': code})
                 print(req.text)
-                return
-            else:
-                on = '1'
-                if not power:
-                    on = '0'
-                # cuando no es un AC, o es un off que se manda un cero:
-                req = requests.put(url, json={'value': on})
-                print(req.text)
-                return
+            except:
+                raise ConnectionExc()
+            self.save(update_fields=['on'])
+            return True
             # consumir ws.. etc
-            return
+        raise ConfigurationExc()
 
     def is_on(self):
         return self.on
@@ -146,22 +149,29 @@ class StateVariable(models.Model):
 
     def change_variable(self, value):
         # a = Artifact.objects.filter(id=self.artifact).first()
-        validate = VariableValidations.value_validation(self.id, value)
-        if not validate.result:
-            return validate
+        value = int(value)
+        validator = VariableValidations()
+        try:
+            validator.value_validation(self,  value)
+        except:
+            raise ValidationExc()
 
         self.value = value
         ssh = SSHConfig.objects.filter(artifactType=self.artifact.type.id).first()
         if ssh:
             command = ssh.method + "(" + str(self.artifact.connector) + "," + value + ")"
-            Connection.execute_script(intermediary.name, self.artifact.intermediary.user, self.artifact.intermediary.password, ssh.script,
+            try:
+                Connection.execute_script(intermediary.name, self.artifact.intermediary.user, self.artifact.intermediary.password, ssh.script,
                                       command)
+            except:
+                raise ConnectionExc()
             self.save(update_fields=['value'])
-            return {'result': True, 'message': 'Se modificó correctamente.'}
+            return True
 
         ws = WSConfig.objects.filter(artifactType=self.artifact.type.id).first()
         if ws:
-            url = 'http://' + self.intermediary.name + '/' + ws.name
+            url = 'http://' + self.artifact.name + '/' + ws.name
+            code = value
             print(url)
             if self.artifact.type.name == 'AC':
                 variables = StateVariable.objects.filter(artifact=self.artifact.id)
@@ -169,17 +179,18 @@ class StateVariable(models.Model):
                 for v in variables:
                     print(v)
                     if v.id == self.id:
-                        code += '#' + value if len(code) > 0 else value
+                        code += '#' + str(value) if len(code) > 0 else str(value)
                     else:
-                        code += '#' + v.value if len(code) > 0 else v.value
+                        code += '#' + str(v.value) if len(code) > 0 else str(v.value)
                 print(code)
+            try:
                 req = requests.put(url, json={'value': code})
                 print(req.text)
-            else:
-                req = requests.put(url, json={'value': value})
-                print(req.text)
-            return {'result': True, 'message': 'Se modificó correctamente.'}
-        return {'result': False, 'message': 'El artefacto esta mal configurado.'}
+            except:
+                raise ConnectionExc()
+            self.save(update_fields=['value'])
+            return True
+        raise ConfigurationExc()
 
 
 class VariableRange(models.Model):
