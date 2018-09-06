@@ -3,6 +3,7 @@ from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
 import requests
+import time
 
 
 class Parameters(models.Model):
@@ -254,6 +255,17 @@ class Scene(models.Model):
 
     def __str__(self):
         return self.name
+
+    def execute_scene(self):
+        actions = SceneActions.objects.filter(scene=self.id).all()
+        for action in actions:
+            value = action.value
+            if action.variable.type == 'ONOFF':
+                action.variable.artifact.change_power(value)
+            else:
+                action.variable.change_variable(value)
+            time.sleep(1)
+        return True
 
 
 class SceneActions(models.Model):
