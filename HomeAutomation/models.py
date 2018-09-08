@@ -4,6 +4,7 @@ from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
 import requests
 import time
+import sys
 
 
 class Parameters(models.Model):
@@ -99,10 +100,12 @@ class Artifact(models.Model):
         ssh = SSHConfig.objects.filter(artifactType=self.type.id).first()
         if ssh:
             on = '1' if power else '0'
-            command = ssh.method + "(" + str(self.connector) + "," + on + ")"
+            command = ssh.method + "(" + str(self.connector) + ", " + on + ")"
+            print(command, self.intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script)
             try:
-                Connection.execute_script(intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
+                Connection.execute_script(self.intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
             except:
+                print(sys.exc_info())
                 raise ConnectionExc()
             self.save(update_fields=['on'])
             return True
@@ -247,11 +250,11 @@ class User(models.Model):
 class Scene(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
-    description = models.CharField(max_length=200, unique=False, null=False)
-    end_time = models.DateTimeField(null=True)
-    initial_time = models.DateTimeField(null=True)
-    frequency = models.CharField(max_length=20, unique=False, null=False)
+    description = models.CharField(max_length=200, null=False)
     on_demand = models.BooleanField(default=False)
+    time_condition = models.BooleanField(default=False)
+    time = models.TimeField(null=True, blank=True)
+    days = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.name

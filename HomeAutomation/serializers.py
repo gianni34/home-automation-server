@@ -148,7 +148,7 @@ class SceneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scene
-        fields = ('id', 'name', 'description', 'end_time', 'initial_time', 'frequency', 'on_demand', 'actions')
+        fields = ('id', 'name', 'description', 'time_condition', 'time', 'on_demand', 'days', 'actions')
         depth = 1
 
     def create(self, validated_data):
