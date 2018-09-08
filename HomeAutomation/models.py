@@ -247,11 +247,11 @@ class User(models.Model):
 class Scene(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
-    description = models.CharField(max_length=200, unique=False, null=False)
-    end_time = models.DateTimeField(null=True)
-    initial_time = models.DateTimeField(null=True)
-    frequency = models.CharField(max_length=20, unique=False, null=False)
+    description = models.CharField(max_length=200, null=False)
     on_demand = models.BooleanField(default=False)
+    time_condition = models.BooleanField(default=False)
+    time = models.TimeField(null=True, blank=True)
+    days = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.name

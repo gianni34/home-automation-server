@@ -158,10 +158,12 @@ def change_power(request):
     return JsonResponse(error_artifact_not_found)
 
 
-
 @api_view(['PUT'])
 def execute_scene(request):
-    scene = request.data['scene']
+    try:
+        scene = request.data['scene']
+    except:
+        return JsonResponse(error_inputs)
     response_data = {'result': False, 'message': 'Se produjo un error al ejecutar la escena.'}
     obj = Scene.objects.filter(id=scene).first()
     if obj:
