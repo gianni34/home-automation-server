@@ -4,6 +4,7 @@ from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
 import requests
 import time
+import sys
 
 
 class Parameters(models.Model):
@@ -99,10 +100,12 @@ class Artifact(models.Model):
         ssh = SSHConfig.objects.filter(artifactType=self.type.id).first()
         if ssh:
             on = '1' if power else '0'
-            command = ssh.method + "(" + str(self.connector) + "," + on + ")"
+            command = ssh.method + "(" + str(self.connector) + ", " + on + ")"
+            print(command, self.intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script)
             try:
-                Connection.execute_script(intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
+                Connection.execute_script(self.intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
             except:
+                print(sys.exc_info())
                 raise ConnectionExc()
             self.save(update_fields=['on'])
             return True

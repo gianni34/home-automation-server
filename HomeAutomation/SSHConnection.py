@@ -11,6 +11,6 @@ class Connection:
         return ssh
 
     def execute_script(intermediary, user, password, script, command):
-        ssh_obj = Connection.getconnection(intermediary, user, password)
+        ssh_obj = Connection.get_connection(intermediary, user, password)
         stdin, stdout, stderr = ssh_obj.exec_command("python /root/" + script + " '" + command + "'")
-        print("Ejecuto el proceso " + name + " correctamente.")
+        print("Ejecuto el proceso correctamente.")
