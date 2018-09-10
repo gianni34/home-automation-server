@@ -1,6 +1,7 @@
 from django.contrib import admin
 from HomeAutomation.models import *
 
+admin.site.register(SceneActions)
 admin.site.register(VariableRange)
 admin.site.register(SSHConfig)
 admin.site.register(WSConfig)

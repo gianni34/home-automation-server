@@ -112,6 +112,7 @@ class SceneActionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SceneActions
         fields = ('id', 'id_aux', 'variable', 'value', 'artifact', 'zone')
+        depth = 1
 
     def create(self, validated_data):
         super(SceneActionsSerializer, self).create(validated_data)

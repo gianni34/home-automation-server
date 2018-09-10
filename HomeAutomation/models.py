@@ -165,8 +165,8 @@ class StateVariable(models.Model):
         if ssh:
             command = ssh.method + "(" + str(self.artifact.connector) + "," + value + ")"
             try:
-                Connection.execute_script(intermediary.name, self.artifact.intermediary.user, self.artifact.intermediary.password, ssh.script,
-                                      command)
+                Connection.execute_script(intermediary.name, self.artifact.intermediary.user,
+                                          self.artifact.intermediary.password, ssh.script, command)
             except:
                 raise ConnectionExc()
             self.save(update_fields=['value'])
@@ -263,8 +263,8 @@ class Scene(models.Model):
         actions = SceneActions.objects.filter(scene=self.id).all()
         for action in actions:
             value = action.value
-            if action.variable.type == 'ONOFF':
-                action.variable.artifact.change_power(value)
+            if action.variable == 0:
+                action.artifact.change_power(value)
             else:
                 action.variable.change_variable(value)
             time.sleep(1)
@@ -273,7 +273,10 @@ class Scene(models.Model):
 
 class SceneActions(models.Model):
     id = models.AutoField(primary_key=True)
-    variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING)
+    zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, default=1)
+    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, default=1)
+    variable = models.IntegerField(default=0)
+    # ForeignKey(StateVariable, on_delete=models.DO_NOTHING, default=0, null=False)
     value = models.CharField(max_length=50, null=False)
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, related_name='actions')
 
