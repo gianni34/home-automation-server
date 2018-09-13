@@ -27,5 +27,6 @@ class Main:
     @staticmethod
     def delete_actions(i):
         actions = SceneActions.objects.filter(scene=i).all()
-        for a in actions:
-            SceneActions.delete(a)
+        if actions:
+            for a in actions:
+                SceneActions.delete(a)

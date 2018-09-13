@@ -108,10 +108,32 @@ class ArtifactSerializer(serializers.ModelSerializer):
 
 class SceneActionsSerializer(serializers.ModelSerializer):
     id_aux = serializers.IntegerField(required=False, allow_null=True)
+    zone_id = serializers.PrimaryKeyRelatedField(
+        queryset=Zone.objects.all(),
+        required=False,
+        source='zone',
+    )
+    artifact_id = serializers.PrimaryKeyRelatedField(
+        queryset=Artifact.objects.all(),
+        allow_null=True,
+        required=False,
+        source='artifact',
+    )
+
+    zone = ZoneSerializer(
+        read_only=False,
+        required=False,
+        allow_null=True,
+    )
+    artifact = ArtifactSerializer(
+        required=False,
+        allow_null=True,
+        read_only=True,
+    )
 
     class Meta:
         model = SceneActions
-        fields = ('id', 'id_aux', 'variable', 'value', 'artifact', 'zone')
+        fields = ('id', 'id_aux', 'variable', 'value', 'artifact', 'zone', 'artifact_id', 'zone_id')
         depth = 1
 
     def create(self, validated_data):
@@ -163,13 +185,12 @@ class SceneSerializer(serializers.ModelSerializer):
         actions = validated_data['actions']
         del validated_data['actions']
         action_serializer = SceneActionsSerializer()
-        scene_aux = Scene.objects.filter(id=instance.id)
-        Main.delete_actions(validated_data['id'])
+        scene_aux = Scene.objects.filter(id=instance.id).first()
+        Main.delete_actions(instance.id)
         for action in actions:
             # mod_action = SceneActions.objects.filter(id=action['id_aux']).first()
             action['scene'] = scene_aux
             action_serializer.create(action)
-        scene_aux = Scene.objects.filter(id=instance.id)
         ret = super(SceneSerializer, self).update(scene_aux, validated_data)
         return ret
 

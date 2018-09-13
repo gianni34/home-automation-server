@@ -2,7 +2,6 @@ from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
-import requests
 import time
 import sys
 
@@ -273,8 +272,8 @@ class Scene(models.Model):
 
 class SceneActions(models.Model):
     id = models.AutoField(primary_key=True)
-    zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, default=1)
-    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, default=1)
+    zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING)
+    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
     variable = models.IntegerField(default=0)
     # ForeignKey(StateVariable, on_delete=models.DO_NOTHING, default=0, null=False)
     value = models.CharField(max_length=50, null=False)
