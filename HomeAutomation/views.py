@@ -49,6 +49,18 @@ class SceneViewSet(viewsets.ModelViewSet):
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        scene = kwargs['pk']
+        del request.data['actions']
+        Main.delete_actions(scene)
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return JsonResponse({'result': True, 'message': 'Se eliminó correctamente la escena.'})
+        except ValidationExc:
+            return JsonResponse({'result': False, 'message': 'No se pudo eliminar la escena correctamente.'})
+
+
 
 class StateVariableViewSet(viewsets.ModelViewSet):
     queryset = StateVariable.objects.all()
