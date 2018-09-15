@@ -2,6 +2,7 @@ from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
+import requests
 import time
 import sys
 
@@ -240,6 +241,10 @@ class User(models.Model):
 
     def get_question(self):
         return self.question
+
+    def change_password(self, new_password):
+        self.password = new_password
+        return True
 
     def __str__(self):
         return self.name

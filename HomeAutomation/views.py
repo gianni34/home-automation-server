@@ -62,7 +62,6 @@ class SceneViewSet(viewsets.ModelViewSet):
             return JsonResponse({'result': False, 'message': 'No se pudo eliminar la escena correctamente.'})
 
 
-
 class StateVariableViewSet(viewsets.ModelViewSet):
     queryset = StateVariable.objects.all()
     serializer_class = StateVariableSerializer
@@ -86,22 +85,19 @@ def set_temperature(request):
     return JsonResponse({'result': True, 'message': 'Dato recibido correctamente.'})
 
 
-""""
 @api_view(['PUT'])
 def change_password(request):
 
     user = request.data['user']
-    old_password = request.data['oPass']
     new_password = request.data['nPass']
 
     usu = User.objects.filter(name=user).first()
-    ret = usu.change_password(old_password, new_password)
+    ret = usu.change_password(new_password)
 
-    if ret == 'OK':
+    if ret:
         return JsonResponse({'EXITO': 'OK'})
     else:
-        return JsonResponse({'ERROR': ret})
-"""
+        return JsonResponse({'ERROR': ''})
 
 
 @api_view(['DELETE'])
