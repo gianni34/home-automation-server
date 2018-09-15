@@ -21,6 +21,7 @@ error_variable_not_found = {'result': False, 'message': 'Se produjo un error, no
 error_login = {'result': False, 'message': 'Usuario y/o contraseña incorrectos.'}
 error_user_exists = {'result': False, 'message': 'El nombre de usuario ingresado ya existe.'}
 
+
 class ZonesViewSet(viewsets.ModelViewSet):
     queryset = Zone.objects.all()
     serializer_class = ZoneSerializer
@@ -133,7 +134,7 @@ def login(request):
         return JsonResponse(error_inputs)
     obj = User.objects.filter(name=user).first()
     if obj and obj.login(password):
-        return JsonResponse({'result': True, 'message': 'Inició correctamente.', 'data': obj.id})
+        return JsonResponse({'result': True, 'message': 'Inició correctamente.', 'data': obj.id, 'isAdmin': obj.isAdmin})
     return JsonResponse(error_login)
 
 
@@ -149,6 +150,8 @@ def change_power(request):
     if obj:
         # mandarle al onion correspondiente que prenda/apague
         try:
+            power = '1' if power else '0'
+            print("POWER: ", power)
             obj.change_power(power)
         except ConnectionExc:
             return JsonResponse(error_connection)
@@ -167,6 +170,7 @@ def execute_scene(request):
     response_data = {'result': False, 'message': 'Se produjo un error al ejecutar la escena.'}
     obj = Scene.objects.filter(id=scene).first()
     if obj:
+        print(obj)
         obj.execute_scene()
         response_data = {'result': True, 'message': 'La escena se ejecuto correctamente.'}
     return JsonResponse(response_data)

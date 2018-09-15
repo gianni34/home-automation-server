@@ -99,8 +99,7 @@ class Artifact(models.Model):
         # method_name = params.get_change_v_method()
         ssh = SSHConfig.objects.filter(artifactType=self.type.id).first()
         if ssh:
-            on = '1' if power else '0'
-            command = ssh.method + "(" + str(self.connector) + ", " + on + ")"
+            command = ssh.method + "(" + str(self.connector) + ", " + power + ")"
             print(command, self.intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script)
             try:
                 Connection.execute_script(self.intermediary.name, self.intermediary.user, self.intermediary.password, ssh.script, command)
@@ -113,7 +112,7 @@ class Artifact(models.Model):
         if ws:
             url = 'http://' + self.intermediary.name + '/' + ws.name
             print(url)
-            if self.type.name == 'AC' and power:
+            if self.type.name == 'AC' and power == '1':
                 variables = StateVariable.objects.filter(artifact=self.id)
                 code = ''
                 for v in variables:
@@ -121,8 +120,8 @@ class Artifact(models.Model):
                     code += '#' + v.value if len(code) > 0 else v.value
                 print(code)
             else:
-                code = '1' if power else '0'
-                # cuando no es un AC, o es un off que se manda un cero:
+                code = '0'
+            # cuando no es un AC, o es un off que se manda un cero:
             try:
                 req = requests.put(url, json={'value': code})
                 print(req.text)
@@ -165,7 +164,7 @@ class StateVariable(models.Model):
         if ssh:
             command = ssh.method + "(" + str(self.artifact.connector) + "," + value + ")"
             try:
-                Connection.execute_script(intermediary.name, self.artifact.intermediary.user,
+                Connection.execute_script(self.artifact.intermediary.name, self.artifact.intermediary.user,
                                           self.artifact.intermediary.password, ssh.script, command)
             except:
                 raise ConnectionExc()
@@ -174,7 +173,7 @@ class StateVariable(models.Model):
 
         ws = WSConfig.objects.filter(artifactType=self.artifact.type.id).first()
         if ws:
-            url = 'http://' + self.artifact.name + '/' + ws.name
+            url = 'http://' + self.artifact.intermediary.name + '/' + ws.name
             code = value
             print(url)
             if self.artifact.type.name == 'AC':
@@ -260,9 +259,12 @@ class Scene(models.Model):
         return self.name
 
     def execute_scene(self):
+        print("entroooooooo")
         actions = SceneActions.objects.filter(scene=self.id).all()
+        print(actions)
         for action in actions:
             value = action.value
+            print("valor: ", value)
             if action.variable == 0:
                 action.artifact.change_power(value)
             else:
