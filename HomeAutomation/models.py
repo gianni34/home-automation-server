@@ -2,7 +2,7 @@ from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
-import requests
+# import requests
 import time
 import sys
 
@@ -258,6 +258,9 @@ class Scene(models.Model):
     time_condition = models.BooleanField(default=False)
     time = models.TimeField(null=True, blank=True)
     days = models.CharField(max_length=20, blank=True, null=True)
+    value_condition = models.BooleanField(default=False)
+    value = models.CharField(max_length=30, null=True)
+    zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
         return self.name

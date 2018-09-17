@@ -1,6 +1,7 @@
 from django.conf.urls import include, url
 from rest_framework import routers
 from HomeAutomation import views
+from HomeAutomation.business import Main
 
 router = routers.DefaultRouter()
 router.register(r'scenes', views.SceneViewSet)
@@ -21,3 +22,5 @@ urlpatterns = [
     url(r'^executeScene', views.execute_scene, name='execute_scene'),
     url(r'^', include(router.urls))
 ]
+
+Main.scheduler()
