@@ -5,6 +5,7 @@ from HomeAutomation.business import Main
 
 router = routers.DefaultRouter()
 router.register(r'scenes', views.SceneViewSet)
+router.register(r'listScenes', views.ListScenesViewSet)
 router.register(r'stateVariables', views.StateVariableViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'zones', views.ZonesViewSet)
@@ -23,4 +24,4 @@ urlpatterns = [
     url(r'^', include(router.urls))
 ]
 
-Main.scheduler()
+# Main.scheduler()

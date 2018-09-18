@@ -62,6 +62,11 @@ class SceneViewSet(viewsets.ModelViewSet):
             return JsonResponse({'result': False, 'message': 'No se pudo eliminar la escena correctamente.'})
 
 
+class ListScenesViewSet(viewsets.ModelViewSet):
+    queryset = Scene.objects.all()
+    serializer_class = ListScenesSerializer
+
+
 class StateVariableViewSet(viewsets.ModelViewSet):
     queryset = StateVariable.objects.all()
     serializer_class = StateVariableSerializer

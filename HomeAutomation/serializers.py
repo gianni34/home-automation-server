@@ -168,7 +168,8 @@ class SceneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scene
-        fields = ('id', 'name', 'description', 'time_condition', 'time', 'on_demand', 'days', 'actions')
+        fields = ('id', 'name', 'description', 'time_condition', 'time', 'value_condition', 'value',
+                  'on_demand', 'days', 'zone', 'actions')
         depth = 1
 
     def create(self, validated_data):
@@ -193,6 +194,14 @@ class SceneSerializer(serializers.ModelSerializer):
             action_serializer.create(action)
         ret = super(SceneSerializer, self).update(scene_aux, validated_data)
         return ret
+
+
+class ListScenesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Scene
+        fields = ('id', 'name', 'description', 'time_condition', 'time', 'value_condition', 'value',
+                  'on_demand', 'days', 'zone')
 
 
 class ParametersSerializer(serializers.ModelSerializer):
