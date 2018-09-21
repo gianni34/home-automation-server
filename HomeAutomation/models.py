@@ -266,7 +266,7 @@ class Scene(models.Model):
         return self.name
 
     def execute_scene(self):
-        print("entroooooooo")
+        print("ENTROOOOOOO")
         actions = SceneActions.objects.filter(scene=self.id).all()
         print(actions)
         for action in actions:
@@ -276,7 +276,9 @@ class Scene(models.Model):
                 action.artifact.change_power(value)
             else:
                 action.variable.change_variable(value)
+            print("EJECUTO ACCION....")
             time.sleep(1)
+        print("EJECUTO ESCENA....")
         return True
 
 

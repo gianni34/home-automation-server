@@ -2,7 +2,7 @@
 # y ponerlos aca como logica de negocio
 
 from HomeAutomation.models import *
-import datetime, sched, time
+import datetime, sched, time, threading
 
 s = sched.scheduler(time.time, time.sleep)
 
@@ -28,15 +28,18 @@ class Main:
                     if s.time == datetime.datetime.now().time():
                         s.execute_scene()
             elif s.value_condition:
+                print("Encontro escena con value condition")
                 zone = s.zone
-                if zone.temperature > ord(s.value):
+                if zone.temperature > int(s.value):
+                    print("Temperatura de la zona mayor al valor de escena")
                     s.execute_scene()
-
+    """"
     @staticmethod
     def scheduler():
         while True:
             s.enter(60, 1, Main.auto_execution_scene)
             s.run()
+    """
 
     @staticmethod
     def delete_actions(i):
@@ -44,3 +47,18 @@ class Main:
         if actions:
             for a in actions:
                 SceneActions.delete(a)
+
+
+class ThreadScheduler(object):
+
+    def __init__(self, interval=60):
+        print("Inicializo el Hilo")
+        thread = threading.Thread(target=self.run, args=())
+        thread.daemon = True
+        thread.start()
+
+    def run(self):
+        while True:
+            print("While True de RUN")
+            s.enter(60, 1, Main.auto_execution_scene)
+            s.run()

@@ -1,7 +1,7 @@
 from django.conf.urls import include, url
 from rest_framework import routers
 from HomeAutomation import views
-from HomeAutomation.business import Main
+from HomeAutomation.business import ThreadScheduler
 
 router = routers.DefaultRouter()
 router.register(r'scenes', views.SceneViewSet)
@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^', include(router.urls))
 ]
 
+thread = ThreadScheduler()
 # Main.scheduler()
