@@ -259,8 +259,8 @@ class Scene(models.Model):
     time = models.TimeField(null=True, blank=True)
     days = models.CharField(max_length=20, blank=True, null=True)
     value_condition = models.BooleanField(default=False)
-    value = models.CharField(max_length=30, null=True)
-    zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
+    value = models.CharField(max_length=30, null=True, blank=True)
+    zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.name

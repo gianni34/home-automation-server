@@ -22,12 +22,14 @@ class Main:
     def auto_execution_scene():
         print("Entro al Auto Execution Scene")
         scenes = Scene.objects.all()
+        executed = False
         for s in scenes:
             if s.time_condition:
                 if Main.is_execution_day(s.id):
                     if s.time == datetime.datetime.now().time():
                         s.execute_scene()
-            elif s.value_condition:
+                        executed = True
+            if s.value_condition and not executed:
                 print("Encontro escena con value condition")
                 zone = s.zone
                 if zone.temperature > int(s.value):
