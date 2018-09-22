@@ -149,7 +149,7 @@ class StateVariable(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=False, null=False)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, related_name='variables')
-    type = models.ForeignKey(VariableType, on_delete=models.DO_NOTHING, null=False)
+    type = models.ForeignKey(VariableType, on_delete=models.DO_NOTHING, null=True)
     value = models.CharField(max_length=50, null=True)
     min = models.IntegerField(default=0)
     max = models.IntegerField(default=1)
@@ -310,7 +310,7 @@ class ArtifactCodes(models.Model):
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=False)
     code = models.CharField(max_length=20, null=False)
     hexa = models.CharField(max_length=20, null=True, blank=True)
-    raw = models.CharField(null=True, blank=True)
+    raw = models.CharField(max_length=1000, null=True, blank=True)
 
     def __str__(self):
         return self.code
