@@ -73,14 +73,20 @@ class VariableRangeSerializer(serializers.ModelSerializer):
         fields = ('id', 'type', 'name', 'value', 'variable')
 
 
+class VariableTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = VariableType
+        fields = ('id', 'name')
+
+
 class StateVariableSerializer(serializers.ModelSerializer):
 
     ranges = VariableRangeSerializer(many=True)
-    # artifact = ArtifactSerializer()
 
     class Meta:
         model = StateVariable
-        fields = ('id', 'name', 'artifact', 'type', 'typeUI', 'value', 'min', 'max', 'scale', 'ranges')
+        fields = ('id', 'name', 'artifact', 'type', 'value', 'min', 'max', 'scale', 'ranges')
 
     def create(self, validated_data):
         artifact = validated_data['artifact']

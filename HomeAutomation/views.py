@@ -248,3 +248,30 @@ def user_question(request):
         response_data = {'result': True, 'question': obj.question}
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+
+@api_view(['GET'])
+def aim_alive(request):
+    try:
+        intermediary = request.data['name']
+    except:
+        return JsonResponse(error_inputs)
+
+    inter_aux = Intermediary.objects.filter(name=intermediary).first()
+    inter_id = inter_aux.id
+    artifacts = Artifact.objects.filter(intermediary=inter_id).all()
+    if artifacts:
+        for a in artifacts:
+            if a.on:
+                a.change_power(True)
+                variables = StateVariable.objects.filter(artifact=a.id).all()
+                if variables:
+                    for v in variables:
+                        v.change_variable(v.value)
+            else:
+                a.change_power(False)
+        response_data = {'result': True, 'actions': 'Se enviaron todas las acciones.'}
+    else:
+        response_data = {'result': False, 'actions': 'No hay acciones que realizar.'}
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+

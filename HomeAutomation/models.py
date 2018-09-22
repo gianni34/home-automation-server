@@ -2,7 +2,8 @@ from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
-# import requests
+from HomeAutomation.business import Main
+import requests
 import time
 import sys
 
@@ -123,7 +124,10 @@ class Artifact(models.Model):
                 code = '0'
             # cuando no es un AC, o es un off que se manda un cero:
             try:
-                req = requests.put(url, json={'value': code})
+                art_code = ArtifactCodes.objects.filter(code=code).first()
+                raw_code = art_code.raw
+                code_array = Main.parse_raw_to_array(raw_code)
+                req = requests.put(url, json={'value': code_array})
                 print(req.text)
             except:
                 raise ConnectionExc()
@@ -136,12 +140,16 @@ class Artifact(models.Model):
         return self.on
 
 
+class VariableType(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True, null=False)
+
+
 class StateVariable(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=False, null=False)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, related_name='variables')
-    type = models.CharField(max_length=50, null=True)
-    typeUI = models.CharField(max_length=50, null=True)
+    type = models.ForeignKey(VariableType, on_delete=models.DO_NOTHING, null=False)
     value = models.CharField(max_length=50, null=True)
     min = models.IntegerField(default=0)
     max = models.IntegerField(default=1)
@@ -187,7 +195,10 @@ class StateVariable(models.Model):
                         code += '#' + str(v.value) if len(code) > 0 else str(v.value)
                 print(code)
             try:
-                req = requests.put(url, json={'value': code})
+                art_code = ArtifactCodes.objects.filter(code=code).first()
+                raw_code = art_code.raw
+                code_array = Main.parse_raw_to_array(raw_code)
+                req = requests.put(url, json={'value': code_array})
                 print(req.text)
             except:
                 raise ConnectionExc()
@@ -287,7 +298,19 @@ class SceneActions(models.Model):
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
     variable = models.IntegerField(default=0)
-    # ForeignKey(StateVariable, on_delete=models.DO_NOTHING, default=0, null=False)
     value = models.CharField(max_length=50, null=False)
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, related_name='actions')
 
+    def __str__(self):
+        return self.scene.name + ' - ' + self.artifact.name
+
+
+class ArtifactCodes(models.Model):
+    id = models.AutoField(primary_key=True)
+    artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=False)
+    code = models.CharField(max_length=20, null=False)
+    hexa = models.CharField(max_length=20, null=True, blank=True)
+    raw = models.CharField(null=True, blank=True)
+
+    def __str__(self):
+        return self.code

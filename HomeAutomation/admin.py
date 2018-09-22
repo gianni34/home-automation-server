@@ -1,4 +1,5 @@
 from django.contrib import admin
+from HomeAutomation.forms import *
 from HomeAutomation.models import *
 
 admin.site.register(SceneActions)
@@ -7,8 +8,6 @@ admin.site.register(SSHConfig)
 admin.site.register(WSConfig)
 admin.site.register(Parameters)
 admin.site.register(Zone)
-admin.site.register(Intermediary)
-admin.site.register(User)
 admin.site.register(Role)
 admin.site.register(ArtifactType)
 admin.site.register(StateVariable)
@@ -31,4 +30,14 @@ class ArtifactAdmin(admin.ModelAdmin):
     extra = 0
 
 
+class IntermediaryAdmin(admin.ModelAdmin):
+    form = IntermediaryForm
+
+
+class UserAdmin(admin.ModelAdmin):
+    form = UserForm
+
+
+admin.site.register(Intermediary, IntermediaryAdmin)
+admin.site.register(User, UserAdmin)
 admin.site.register(Artifact, ArtifactAdmin)

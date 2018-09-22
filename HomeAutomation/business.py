@@ -50,6 +50,11 @@ class Main:
             for a in actions:
                 SceneActions.delete(a)
 
+    def parse_raw_to_array(self, raw_code):
+        codes = raw_code.split(',')
+        int_codes = list(map(int, codes))
+        return int_codes
+
 
 class ThreadScheduler(object):
 
