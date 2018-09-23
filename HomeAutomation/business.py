@@ -2,7 +2,10 @@
 # y ponerlos aca como logica de negocio
 
 from HomeAutomation.models import *
-import datetime, sched, time, threading
+import datetime
+import sched
+import time
+import threading
 
 s = sched.scheduler(time.time, time.sleep)
 
@@ -50,7 +53,8 @@ class Main:
             for a in actions:
                 SceneActions.delete(a)
 
-    def parse_raw_to_array(self, raw_code):
+    @staticmethod
+    def parse_raw_to_array(raw_code):
         codes = raw_code.split(',')
         int_codes = list(map(int, codes))
         return int_codes
