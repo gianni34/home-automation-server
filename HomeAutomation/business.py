@@ -19,29 +19,29 @@ class Main:
         return False
 
     @staticmethod
+    def is_execution_time(i):
+        scene = Scene.objects.filter(id=i).first()
+        now = datetime.datetime.now().time()
+        if scene.time >= now <= scene.end_time:
+            return True
+        else:
+            return False
+
+    @staticmethod
     def auto_execution_scene():
         print("Entro al Auto Execution Scene")
         scenes = Scene.objects.all()
-        executed = False
         for s in scenes:
             if s.time_condition:
                 if Main.is_execution_day(s.id):
                     if s.time == datetime.datetime.now().time():
                         s.execute_scene()
-                        executed = True
-            if s.value_condition and not executed:
-                print("Encontro escena con value condition")
-                zone = s.zone
-                if zone.temperature > int(s.value):
-                    print("Temperatura de la zona mayor al valor de escena")
-                    s.execute_scene()
-    """"
-    @staticmethod
-    def scheduler():
-        while True:
-            s.enter(60, 1, Main.auto_execution_scene)
-            s.run()
-    """
+            elif s.value_condition:
+                if Main.is_execution_day(s.id) and Main.is_execution_time(s.id):
+                    zone = s.zone
+                    if zone.temperature > int(s.value):
+                        print("Temperatura de la zona mayor al valor de escena")
+                        s.execute_scene()
 
     @staticmethod
     def delete_actions(i):

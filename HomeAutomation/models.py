@@ -268,6 +268,7 @@ class Scene(models.Model):
     on_demand = models.BooleanField(default=False)
     time_condition = models.BooleanField(default=False)
     time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
     days = models.CharField(max_length=20, blank=True, null=True)
     value_condition = models.BooleanField(default=False)
     value = models.CharField(max_length=30, null=True, blank=True)
@@ -277,19 +278,14 @@ class Scene(models.Model):
         return self.name
 
     def execute_scene(self):
-        print("ENTROOOOOOO")
         actions = SceneActions.objects.filter(scene=self.id).all()
-        print(actions)
         for action in actions:
             value = action.value
-            print("valor: ", value)
             if action.variable == 0:
                 action.artifact.change_power(value)
             else:
                 action.variable.change_variable(value)
-            print("EJECUTO ACCION....")
             time.sleep(1)
-        print("EJECUTO ESCENA....")
         return True
 
 
