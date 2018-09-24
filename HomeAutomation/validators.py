@@ -22,3 +22,9 @@ class VariableValidations:
                 if i == value:
                     return {'result': True, 'message': ""}
             return {'result': False, 'message': "El valor pasado, no contiene una precision correcta."}
+
+    @staticmethod
+    def parse_raw_to_array(raw_code):
+        codes = raw_code.split(',')
+        int_codes = list(map(int, codes))
+        return int_codes

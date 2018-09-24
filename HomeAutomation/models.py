@@ -2,7 +2,6 @@ from django.db import models
 from HomeAutomation.SSHConnection import Connection
 from HomeAutomation.validators import VariableValidations
 from HomeAutomation.exceptions import *
-from HomeAutomation.business import Main
 import requests
 import time
 import sys
@@ -126,7 +125,7 @@ class Artifact(models.Model):
             try:
                 art_code = ArtifactCodes.objects.filter(code=code).first()
                 raw_code = art_code.raw
-                code_array = Main.parse_raw_to_array(raw_code)
+                code_array = VariableValidations.parse_raw_to_array(raw_code)
                 req = requests.put(url, json={'value': code_array})
                 print(req.text)
             except:
@@ -197,7 +196,7 @@ class StateVariable(models.Model):
             try:
                 art_code = ArtifactCodes.objects.filter(code=code).first()
                 raw_code = art_code.raw
-                code_array = Main.parse_raw_to_array(raw_code)
+                code_array = validator.parse_raw_to_array(raw_code)
                 req = requests.put(url, json={'value': code_array})
                 print(req.text)
             except:

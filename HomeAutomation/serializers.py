@@ -174,7 +174,7 @@ class SceneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scene
-        fields = ('id', 'name', 'description', 'time_condition', 'time', 'value_condition', 'value',
+        fields = ('id', 'name', 'description', 'time_condition', 'time', 'end_time', 'value_condition', 'value',
                   'on_demand', 'days', 'zone', 'actions')
         depth = 1
 
@@ -214,3 +214,9 @@ class ParametersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parameters
         fields = ('id', 'name', 'value')
+
+
+class ArtifactCodes(serializers.ModelSerializer):
+    class Meta:
+        model = ArtifactCodes
+        fields = ('id', 'artifact', 'code', 'raw', 'hexa')
