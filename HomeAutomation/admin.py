@@ -2,7 +2,9 @@ from django.contrib import admin
 from HomeAutomation.forms import *
 from HomeAutomation.models import *
 
-admin.site.register(SceneActions)
+admin.site.register(ArtifactCode)
+admin.site.register(VariableType)
+admin.site.register(SceneAction)
 admin.site.register(VariableRange)
 admin.site.register(SSHConfig)
 admin.site.register(WSConfig)

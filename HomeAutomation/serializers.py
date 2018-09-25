@@ -112,7 +112,7 @@ class ArtifactSerializer(serializers.ModelSerializer):
         fields = ('id', 'zone', 'type', 'name', 'intermediary', 'connector', 'on', 'variables')
 
 
-class SceneActionsSerializer(serializers.ModelSerializer):
+class SceneActionSerializer(serializers.ModelSerializer):
     id_aux = serializers.IntegerField(required=False, allow_null=True)
     zone_id = serializers.PrimaryKeyRelatedField(
         queryset=Zone.objects.all(),
@@ -138,39 +138,39 @@ class SceneActionsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = SceneActions
+        model = SceneAction
         fields = ('id', 'id_aux', 'variable', 'value', 'artifact', 'zone', 'artifact_id', 'zone_id')
         depth = 1
 
     def create(self, validated_data):
-        super(SceneActionsSerializer, self).create(validated_data)
+        super(SceneActionSerializer, self).create(validated_data)
 
     """"
     def update(self, instance, validated_data):
         # id_aux = instance['variable'].id
         # mod_action = User.objects.filter(id=id_aux).first()
         # a_id = validated_data['variable'].id
-        a = SceneActions.objects.filter(id=validated_data['id_aux']).first()
+        a = SceneAction.objects.filter(id=validated_data['id_aux']).first()
         if not a:
             a_id = 0
             del validated_data['id_aux']
-            ret = super(SceneActionsSerializer, self).create(validated_data)
+            ret = super(SceneActionSerializer, self).create(validated_data)
             return ret
         else:
             del validated_data['id_aux']
-            ret = super(SceneActionsSerializer, self).update(instance, validated_data)
+            ret = super(SceneActionSerializer, self).update(instance, validated_data)
             return ret
     """
 
     def __delete__(self, data):
         # id_aux = data['variable'].id
-        to_del = SceneActions.objects.filter(id=data.id_aux).first()
+        to_del = SceneAction.objects.filter(id=data.id_aux).first()
         to_del.delete()
         return True
 
 
 class SceneSerializer(serializers.ModelSerializer):
-    actions = SceneActionsSerializer(many=True)
+    actions = SceneActionSerializer(many=True)
 
     class Meta:
         model = Scene
@@ -182,7 +182,7 @@ class SceneSerializer(serializers.ModelSerializer):
         actions = validated_data['actions']
         del validated_data['actions']
         ret = super(SceneSerializer, self).create(validated_data)
-        action_serializer = SceneActionsSerializer()
+        action_serializer = SceneActionSerializer()
         for action in actions:
             action['scene'] = ret
             action_serializer.create(action)
@@ -191,11 +191,11 @@ class SceneSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         actions = validated_data['actions']
         del validated_data['actions']
-        action_serializer = SceneActionsSerializer()
+        action_serializer = SceneActionSerializer()
         scene_aux = Scene.objects.filter(id=instance.id).first()
         Main.delete_actions(instance.id)
         for action in actions:
-            # mod_action = SceneActions.objects.filter(id=action['id_aux']).first()
+            # mod_action = SceneAction.objects.filter(id=action['id_aux']).first()
             action['scene'] = scene_aux
             action_serializer.create(action)
         ret = super(SceneSerializer, self).update(scene_aux, validated_data)
@@ -218,5 +218,5 @@ class ParametersSerializer(serializers.ModelSerializer):
 
 class ArtifactCodes(serializers.ModelSerializer):
     class Meta:
-        model = ArtifactCodes
+        model = ArtifactCode
         fields = ('id', 'artifact', 'code', 'raw', 'hexa')

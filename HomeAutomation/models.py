@@ -123,7 +123,7 @@ class Artifact(models.Model):
                 code = '0'
             # cuando no es un AC, o es un off que se manda un cero:
             try:
-                art_code = ArtifactCodes.objects.filter(code=code).first()
+                art_code = ArtifactCode.objects.filter(code=code).first()
                 raw_code = art_code.raw
                 code_array = VariableValidations.parse_raw_to_array(raw_code)
                 req = requests.put(url, json={'value': code_array})
@@ -142,6 +142,9 @@ class Artifact(models.Model):
 class VariableType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
+
+    def __str__(self):
+        return self.name
 
 
 class StateVariable(models.Model):
@@ -194,7 +197,7 @@ class StateVariable(models.Model):
                         code += '#' + str(v.value) if len(code) > 0 else str(v.value)
                 print(code)
             try:
-                art_code = ArtifactCodes.objects.filter(code=code).first()
+                art_code = ArtifactCode.objects.filter(code=code).first()
                 raw_code = art_code.raw
                 code_array = validator.parse_raw_to_array(raw_code)
                 req = requests.put(url, json={'value': code_array})
@@ -277,7 +280,7 @@ class Scene(models.Model):
         return self.name
 
     def execute_scene(self):
-        actions = SceneActions.objects.filter(scene=self.id).all()
+        actions = SceneAction.objects.filter(scene=self.id).all()
         for action in actions:
             value = action.value
             if action.variable == 0:
@@ -288,7 +291,7 @@ class Scene(models.Model):
         return True
 
 
-class SceneActions(models.Model):
+class SceneAction(models.Model):
     id = models.AutoField(primary_key=True)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
@@ -300,7 +303,7 @@ class SceneActions(models.Model):
         return self.scene.name + ' - ' + self.artifact.name
 
 
-class ArtifactCodes(models.Model):
+class ArtifactCode(models.Model):
     id = models.AutoField(primary_key=True)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=False)
     code = models.CharField(max_length=20, null=False)
