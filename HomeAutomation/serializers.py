@@ -217,7 +217,7 @@ class ParametersSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'value')
 
 
-class ArtifactCodes(serializers.ModelSerializer):
+class ArtifactCodesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtifactCode
         fields = ('id', 'artifact', 'code', 'raw', 'hexa')

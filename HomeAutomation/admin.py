@@ -12,8 +12,6 @@ admin.site.register(Zone)
 admin.site.register(ArtifactType)
 admin.site.register(StateVariable)
 admin.site.register(Scene)
-admin.site.register(ArtifactCodes)
-admin.site.register(VariableType)
 
 
 class VariableRangeInLine(admin.StackedInline):
