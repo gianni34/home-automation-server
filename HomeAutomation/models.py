@@ -167,13 +167,11 @@ class VariableType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
 
-<<<<<<< HEAD
+
     class Meta:
         verbose_name = 'Tipo de Variable'
         verbose_name_plural = 'Tipos de Variables'
 
-=======
->>>>>>> c986c9ebb3b9a67e6215b5d9a2081594e0814a8e
     def __str__(self):
         return self.name
 
