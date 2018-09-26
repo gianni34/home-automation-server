@@ -28,6 +28,10 @@ class ArtifactType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
 
+    class Meta:
+        verbose_name = 'Tipo de Artefacto'
+        verbose_name_plural = 'Tipos de Artefactos'
+
     def __str__(self):
         return self.name
 
@@ -41,6 +45,10 @@ class SSHConfig(models.Model):
     script = models.CharField(max_length=100, null=False)
     method = models.CharField(max_length=100, null=False)
 
+    class Meta:
+        verbose_name = 'Configuracion de SSH'
+        verbose_name_plural = 'Configuraciones de SSH'
+
     def __str__(self):
         return self.script + ' - ' + self.method
 
@@ -49,6 +57,10 @@ class WSConfig(models.Model):
     id = models.AutoField(primary_key=True)
     artifactType = models.OneToOneField(ArtifactType, on_delete=models.DO_NOTHING, blank=False, null=False)
     name = models.CharField(max_length=100, null=False)
+
+    class Meta:
+        verbose_name = 'Configuracion de WS'
+        verbose_name_plural = 'Configuraciones de WS'
 
     def __str__(self):
         return self.name
@@ -61,6 +73,10 @@ class Intermediary(models.Model):
     user = models.CharField(max_length=40, unique=False, null=False)
     password = models.CharField(max_length=40, unique=False, null=False)
 
+    class Meta:
+        verbose_name = 'Actuador'
+        verbose_name_plural = 'Actuadores'
+
     def __str__(self):
         return self.name + ' -  IP: ' + self.ip
 
@@ -68,10 +84,14 @@ class Intermediary(models.Model):
 class Zone(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
-    type = models.CharField(max_length=40, unique=False, null=True)
-    pin = models.IntegerField(null=True)
+    type = models.CharField(max_length=40, unique=False, null=True, blank=True)
+    pin = models.IntegerField(null=True, blank=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, blank=True, null=True)
-    temperature = models.FloatField(null=True)
+    temperature = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Zona'
+        verbose_name_plural = 'Zonas'
 
     def __str__(self):
         return self.name
@@ -88,10 +108,14 @@ class Artifact(models.Model):
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True)
     intermediary = models.ForeignKey(Intermediary, on_delete=models.DO_NOTHING, null=True)
     on = models.BooleanField(default=False)
-    connector = models.CharField(max_length=100, null=True)
+    connector = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Artefacto'
+        verbose_name_plural = 'Artefactos'
 
     def __str__(self):
-        return self.name + "(" + self.zone.name + ")"
+        return self.name + " (" + self.zone.name + ")"
 
     def change_power(self, power):
         self.on = power
@@ -123,7 +147,7 @@ class Artifact(models.Model):
                 code = '0'
             # cuando no es un AC, o es un off que se manda un cero:
             try:
-                art_code = ArtifactCodes.objects.filter(code=code).first()
+                art_code = ArtifactCode.objects.filter(code=code).first()
                 raw_code = art_code.raw
                 code_array = VariableValidations.parse_raw_to_array(raw_code)
                 req = requests.put(url, json={'value': code_array})
@@ -143,6 +167,13 @@ class VariableType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
 
+    class Meta:
+        verbose_name = 'Tipo de Variable'
+        verbose_name_plural = 'Tipos de Variables'
+
+    def __str__(self):
+        return self.name
+
 
 class StateVariable(models.Model):
     id = models.AutoField(primary_key=True)
@@ -153,6 +184,10 @@ class StateVariable(models.Model):
     min = models.IntegerField(default=0)
     max = models.IntegerField(default=1)
     scale = models.IntegerField(default=1)
+
+    class Meta:
+        verbose_name = 'Variable de Estado'
+        verbose_name_plural = 'Variables de Estado'
 
     def __str__(self):
         return self.name
@@ -194,7 +229,7 @@ class StateVariable(models.Model):
                         code += '#' + str(v.value) if len(code) > 0 else str(v.value)
                 print(code)
             try:
-                art_code = ArtifactCodes.objects.filter(code=code).first()
+                art_code = ArtifactCode.objects.filter(code=code).first()
                 raw_code = art_code.raw
                 code_array = validator.parse_raw_to_array(raw_code)
                 req = requests.put(url, json={'value': code_array})
@@ -213,6 +248,10 @@ class VariableRange(models.Model):
     value = models.CharField(max_length=50, default=0, null=False)
     variable = models.ForeignKey(StateVariable, on_delete=models.DO_NOTHING, null=False, related_name='ranges')
 
+    class Meta:
+        verbose_name = 'Rango de Variable'
+        verbose_name_plural = 'Rangos de Variables'
+
     def __str__(self):
         return self.name
 
@@ -228,11 +267,14 @@ class Role(models.Model):
 class User(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
-    # role = models.ForeignKey(Role, on_delete=models.DO_NOTHING, null=False)
     question = models.CharField(max_length=100, unique=False, null=True)
     answer = models.CharField(max_length=100, unique=False, null=True)
     password = models.CharField(max_length=100, unique=False, null=False)
     isAdmin = models.BooleanField(null=False, default=False)
+
+    class Meta:
+        verbose_name = 'Usuario'
+        verbose_name_plural = 'Usuarios'
 
     def verify_old_password(self, old_password):
         return old_password == self.password
@@ -271,13 +313,18 @@ class Scene(models.Model):
     days = models.CharField(max_length=20, blank=True, null=True)
     value_condition = models.BooleanField(default=False)
     value = models.CharField(max_length=30, null=True, blank=True)
+    condition_operation = models.CharField(max_length=20, null=True, blank=True)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Escena'
+        verbose_name_plural = 'Escenas'
 
     def __str__(self):
         return self.name
 
     def execute_scene(self):
-        actions = SceneActions.objects.filter(scene=self.id).all()
+        actions = SceneAction.objects.filter(scene=self.id).all()
         for action in actions:
             value = action.value
             if action.variable == 0:
@@ -288,7 +335,7 @@ class Scene(models.Model):
         return True
 
 
-class SceneActions(models.Model):
+class SceneAction(models.Model):
     id = models.AutoField(primary_key=True)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING)
@@ -296,16 +343,24 @@ class SceneActions(models.Model):
     value = models.CharField(max_length=50, null=False)
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, related_name='actions')
 
+    class Meta:
+        verbose_name = 'Accion'
+        verbose_name_plural = 'Acciones de Escenas'
+
     def __str__(self):
         return self.scene.name + ' - ' + self.artifact.name
 
 
-class ArtifactCodes(models.Model):
+class ArtifactCode(models.Model):
     id = models.AutoField(primary_key=True)
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=False)
     code = models.CharField(max_length=20, null=False)
     hexa = models.CharField(max_length=20, null=True, blank=True)
     raw = models.CharField(max_length=1000, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Codigos de Artefacto'
+        verbose_name_plural = 'Codigos de Artefactos'
 
     def __str__(self):
         return self.code

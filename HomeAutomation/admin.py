@@ -2,16 +2,18 @@ from django.contrib import admin
 from HomeAutomation.forms import *
 from HomeAutomation.models import *
 
-admin.site.register(SceneActions)
+admin.site.register(ArtifactCode)
+admin.site.register(VariableType)
+admin.site.register(SceneAction)
 admin.site.register(VariableRange)
 admin.site.register(SSHConfig)
 admin.site.register(WSConfig)
-admin.site.register(Parameters)
 admin.site.register(Zone)
-admin.site.register(Role)
 admin.site.register(ArtifactType)
 admin.site.register(StateVariable)
 admin.site.register(Scene)
+admin.site.register(ArtifactCodes)
+admin.site.register(VariableType)
 
 
 class VariableRangeInLine(admin.StackedInline):

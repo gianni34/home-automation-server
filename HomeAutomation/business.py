@@ -48,10 +48,10 @@ class Main:
 
     @staticmethod
     def delete_actions(i):
-        actions = SceneActions.objects.filter(scene=i).all()
+        actions = SceneAction.objects.filter(scene=i).all()
         if actions:
             for a in actions:
-                SceneActions.delete(a)
+                SceneAction.delete(a)
 
 
 class ThreadScheduler(object):
