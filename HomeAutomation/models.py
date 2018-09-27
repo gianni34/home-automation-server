@@ -69,7 +69,6 @@ class WSConfig(models.Model):
 class Intermediary(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40, unique=True, null=False)
-    ip = models.CharField(max_length=20, unique=True, null=False)
     user = models.CharField(max_length=40, unique=False, null=False)
     password = models.CharField(max_length=40, unique=False, null=False)
 
@@ -78,7 +77,7 @@ class Intermediary(models.Model):
         verbose_name_plural = 'Actuadores'
 
     def __str__(self):
-        return self.name + ' -  IP: ' + self.ip
+        return self.name
 
 
 class Zone(models.Model):
@@ -167,7 +166,6 @@ class VariableType(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True, null=False)
 
-
     class Meta:
         verbose_name = 'Tipo de Variable'
         verbose_name_plural = 'Tipos de Variables'
@@ -191,7 +189,7 @@ class StateVariable(models.Model):
         verbose_name_plural = 'Variables de Estado'
 
     def __str__(self):
-        return self.name
+        return self.id + ' - ' + self.name
 
     def change_variable(self, value):
         # a = Artifact.objects.filter(id=self.artifact).first()
@@ -229,14 +227,14 @@ class StateVariable(models.Model):
                     else:
                         code += '#' + str(v.value) if len(code) > 0 else str(v.value)
                 print(code)
-            try:
-                art_code = ArtifactCode.objects.filter(code=code).first()
-                raw_code = art_code.raw
-                code_array = validator.parse_raw_to_array(raw_code)
-                req = requests.put(url, json={'value': code_array})
-                print(req.text)
-            except:
-                raise ConnectionExc()
+                try:
+                    art_code = ArtifactCode.objects.filter(code=code).first()
+                    raw_code = art_code.raw
+                    code_array = validator.parse_raw_to_array(raw_code)
+                    req = requests.put(url, json={'value': code_array})
+                    print(req.text)
+                except:
+                    raise ConnectionExc()
             self.save(update_fields=['value'])
             return True
         raise ConfigurationExc()
@@ -254,7 +252,7 @@ class VariableRange(models.Model):
         verbose_name_plural = 'Rangos de Variables'
 
     def __str__(self):
-        return self.name
+        return self.name + ' ( ' + self.variable.artifact.name + '-' + self.variable + ')'
 
 
 class Role(models.Model):
@@ -316,6 +314,7 @@ class Scene(models.Model):
     value = models.CharField(max_length=30, null=True, blank=True)
     condition_operation = models.CharField(max_length=20, null=True, blank=True)
     zone = models.ForeignKey(Zone, on_delete=models.DO_NOTHING, null=True, blank=True)
+    executed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Escena'
@@ -333,7 +332,13 @@ class Scene(models.Model):
             else:
                 action.variable.change_variable(value)
             time.sleep(1)
+        if self.value_condition:
+            self.change_executed(True)
         return True
+
+    def change_executed(self, bool):
+        self.executed = bool
+        self.save(update_fields=['executed'])
 
 
 class SceneAction(models.Model):
@@ -357,7 +362,7 @@ class ArtifactCode(models.Model):
     artifact = models.ForeignKey(Artifact, on_delete=models.DO_NOTHING, null=False)
     code = models.CharField(max_length=20, null=False)
     hexa = models.CharField(max_length=20, null=True, blank=True)
-    raw = models.CharField(max_length=1000, null=True, blank=True)
+    raw = models.CharField(max_length=4000, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Codigos de Artefacto'

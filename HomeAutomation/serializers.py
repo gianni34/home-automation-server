@@ -107,10 +107,11 @@ class StateVariableSerializer(serializers.ModelSerializer):
 
 class ArtifactSerializer(serializers.ModelSerializer):
     variables = StateVariableSerializer(many=True)
+    zone_name = serializers.CharField(source='zone.name')
 
     class Meta:
         model = Artifact
-        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'connector', 'on', 'variables')
+        fields = ('id', 'zone', 'type', 'name', 'intermediary', 'connector', 'on', 'variables', 'zone_name')
 
 
 class SceneActionSerializer(serializers.ModelSerializer):

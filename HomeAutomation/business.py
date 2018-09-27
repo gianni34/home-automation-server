@@ -16,6 +16,7 @@ class Main:
         scene = Scene.objects.filter(id=i).first()
         string_days = scene.days
         days = string_days.split(',')
+        days = list(map(int, days))
         for d in days:
             if d == datetime.datetime.now().weekday():
                 return True
@@ -25,7 +26,7 @@ class Main:
     def is_execution_time(i):
         scene = Scene.objects.filter(id=i).first()
         now = datetime.datetime.now().time()
-        if scene.time >= now <= scene.end_time:
+        if scene.time <= now <= scene.end_time:
             return True
         else:
             return False
@@ -37,14 +38,26 @@ class Main:
         for s in scenes:
             if s.time_condition:
                 if Main.is_execution_day(s.id):
-                    if s.time == datetime.datetime.now().time():
-                        s.execute_scene()
+                    now = datetime.datetime.now()
+                    if s.time.hour == now.hour:
+                        if s.time.minute == now.minute:
+                            if not s.executed:
+                                s.execute_scene()
             elif s.value_condition:
                 if Main.is_execution_day(s.id) and Main.is_execution_time(s.id):
                     zone = s.zone
                     if zone.temperature > int(s.value):
                         print("Temperatura de la zona mayor al valor de escena")
-                        s.execute_scene()
+                        if not s.executed:
+                            s.execute_scene()
+
+    @staticmethod
+    def change_executed_scene():
+        scenes = Scene.objects.filter(value_condition=True).all()
+        for s in scenes:
+            if s.executed:
+                if not (Main.is_execution_day(s.id) and Main.is_execution_time(s.id)):
+                    s.change_executed(False)
 
     @staticmethod
     def delete_actions(i):
@@ -66,4 +79,5 @@ class ThreadScheduler(object):
         while True:
             print("While True de RUN")
             s.enter(60, 1, Main.auto_execution_scene)
+            s.enter(360, 1, Main.change_executed_scene)
             s.run()

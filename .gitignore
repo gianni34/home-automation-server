@@ -1,16 +1,9 @@
 
 PrototypeDB
+__pycache__/
+*.py[cod]
+*$py.class
 *.pyc
-HomeAutomation/__pycache__/__init__.cpython-36.pyc
-HomeAutomation/__pycache__/admin.cpython-36.pyc
-HomeAutomation/__pycache__/business.cpython-36.pyc
-HomeAutomation/__pycache__/models.cpython-36.pyc
-HomeAutomation/__pycache__/serializers.cpython-36.pyc
-HomeAutomation/__pycache__/SSHConnection.cpython-36.pyc
-HomeAutomation/__pycache__/urls.cpython-36.pyc
-HomeAutomation/__pycache__/validators.cpython-36.pyc
-HomeAutomation/__pycache__/views.cpython-36.pyc
-HomeAutomation/migrations/0015_auto_20180717_1535.py
-HomeAutomation/migrations/0014_remove_user_role.py
-HomeAutomation/migrations/0013_user_isadmin.py
-HomeAutomation/migrations/0012_auto_20180709_1726.py
+migrations/
+
+.idea/
